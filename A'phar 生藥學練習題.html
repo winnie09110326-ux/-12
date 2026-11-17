@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A'phar 生藥學練習題</title>
+<style>
+:root{--bg:#faf7f2;--fg:#222;--card:#fff;--mut:#777;--ac:#3b6ea5;--ok:#2e7d4f;--okb:#e3f3e9;--no:#b3392f;--nob:#fbe7e4;--bd:#ddd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17181b;--fg:#eee;--card:#222428;--mut:#9a9a9a;--ac:#7fb0e6;--ok:#6fcf97;--okb:#1d3a2a;--no:#ff8a7e;--nob:#3f1f1c;--bd:#3a3d42;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17181b;--fg:#eee;--card:#222428;--mut:#9a9a9a;--ac:#7fb0e6;--ok:#6fcf97;--okb:#1d3a2a;--no:#ff8a7e;--nob:#3f1f1c;--bd:#3a3d42;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Noto Sans TC","PingFang TC",sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:8px 0 2px}h2{font-size:15px;color:var(--mut);margin:20px 0 8px}
+.sub{color:var(--mut);font-size:14px;margin:0 0 12px}
+button{font:inherit;color:inherit;cursor:pointer}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin:0 0 8px}
+.row small{color:var(--mut)}
+.pri{background:var(--ac);color:var(--bg);border:0;font-weight:600}
+.pri small{color:inherit;opacity:.85}
+.top{display:flex;justify-content:space-between;color:var(--mut);font-size:14px;margin-bottom:6px}
+.bar{height:4px;background:var(--bd);border-radius:2px;margin-bottom:14px}.bar i{display:block;height:100%;background:var(--ac);border-radius:2px}
+.tag{font-size:12px;color:var(--ac)}
+.q{font-size:17px;font-weight:600;margin:4px 0 14px}
+.opt{display:block;width:100%;text-align:left;background:var(--card);border:1.5px solid var(--bd);border-radius:12px;padding:10px 14px;margin:0 0 8px}
+.opt.ok{border-color:var(--ok);background:var(--okb)}.opt.no{border-color:var(--no);background:var(--nob)}
+.note{display:block;font-size:14px;margin-top:4px;color:var(--mut)}
+.opt.ok .note{color:var(--ok)}.opt.no .note{color:var(--no)}
+.nav{display:flex;gap:8px;margin-top:14px}.nav button{flex:1;padding:12px;border-radius:12px;border:1px solid var(--bd);background:var(--card)}
+.nav .pri{border:0}
+.big{font-size:44px;font-weight:700;text-align:center;margin:20px 0 4px}
+.ctr{text-align:center;color:var(--mut)}
+</style></head><body><main id="app"></main>
+<script>
+// s=章節 q=題目 o=選項 a=答案索引 n=各選項詳解
+const Q=[
+{s:"配醣體總論",q:"Mangiferin 屬於下列何種類型醣苷?(112-2)",o:["O-glycoside","C-glycoside","N-glycoside","S-glycoside"],a:1,n:["最常見的連結,但芒果苷(知母成分)不是","醣基以 C–C 鍵直接接在苷元碳上,不易水解,分布較少","N 型代表為 ATP、UDP","S 型代表為 Sinigrin、Sinalbin"]},
+{s:"配醣體總論",q:"下列何種醣苷屬於 C-glycoside?(111-2)",o:["sennoside A","aloin B","glycyrrhizin","prunasin"],a:1,n:["Sennoside 為 O-glycoside(記法:Senna+下面沒有荷到)","Aloin(Barbaloin)為 C-glycoside,Aloe 的主成分","Glycyrrhizic acid 為 O-glycoside","Prunasin 為 O-glycoside(氰配醣體)"]},
+{s:"配醣體總論",q:"下列具抗焦慮、鎮靜安神作用之中藥,何者與其所含 flavone C-glycosides 成分(如 spinosin 及 acylspinosins)有關?(111-1)",o:["鉤藤","大棗","天麻","遠志"],a:1,n:["鉤藤主要含吲哚類生物鹼","依書中解答,大棗含 flavone C-glycosides 成分","天麻主要成分為 gastrodin 等酚苷","遠志主要含皂苷類成分"]},
+{s:"配醣體總論",q:"下列生藥之主要醣苷成分,何者不具 C-glycoside 結構?(110-2)",o:["cascara sagrada","aloe","cochineal","senna"],a:3,n:["Cascaroside 為 C- 及 O-glycoside 並存","Aloin 為 C-glycoside","Cochineal(胭脂蟲)含 C-glycoside 色素","Senna 含 sennoside,為 O-glycoside,故選 D"]},
+{s:"配醣體總論",q:"生藥 frangula 所含的醣苷屬於下列何種 glycoside?(110-2)",o:["C-","O-","S-","C- 及 O-"],a:1,n:["C 型見於 aloin、mangiferin 等","Frangulin 為 emodin 的 O-glycoside","S 型見於 sinigrin、sinalbin","C- 及 O- 並存者為 cascaroside"]},
+{s:"配醣體總論",q:"下列醣苷之結構中,何者不含 C-glycoside?(109-1)",o:["aloin A","mangiferin","sennoside A","cascaroside A"],a:2,n:["Aloin 為 C-glycoside","Mangiferin 為 C-glycoside","Sennoside A 為 O-glycoside,不含 C-glycoside","Cascaroside 為 C- 及 O-glycoside"]},
+{s:"配醣體總論",q:"下列生藥,何者之主成分屬於 C-glycoside 類?(108-1)",o:["aloe","frangula","rheum","senna"],a:0,n:["Aloe 主成分 aloin 為 C-glycoside","Frangula 含 frangulin,屬 O-glycoside","Rheum(大黃)主要為 O-glycoside","Senna 含 sennoside,屬 O-glycoside"]},
+{s:"配醣體總論",q:"知母成分芒果苷(mangiferin)之結構,Mangiferin 屬於:(107-2)",o:["O-glycoside","C-glycoside","N-glycoside","S-glycoside"],a:1,n:["不是 O 型","Mangiferin 為 C-glycoside(知母、芒果苷)","N 型僅見於 ATP、UDP 等","S 型僅見於 sinigrin 類"]},
+{s:"配醣體總論",q:"下列生藥成分之醣基與非醣基連結原子,何者與其他三種不同?(107-2)",o:["prunasin","sennoside A","frangulin A","sinigrin"],a:3,n:["O-glycoside","O-glycoside","O-glycoside","Sinigrin 為 S-glycoside,連結原子為 S,與其他三者的 O 不同"]},
+{s:"強心配醣體",q:"固醇類藥物會增加強心苷(Cardiac glycoside)之毒性,主要是與細胞內何種離子濃度變化有關?(113-1)",o:["鈉離子濃度增加","鉀離子濃度減少","鈣離子濃度增加","鈉離子濃度減少"],a:1,n:["強心苷抑制 Na⁺/K⁺-ATPase 會使細胞內 Na⁺ 上升,但此題重點在低血鉀","低血鉀使強心苷更易結合 ATPase,毒性增加,為最佳答案","書中註記:鈣增加亦會加重毒性,但 B 更好","Na⁺ 減少不會增加毒性"]},
+{s:"強心配醣體",q:"下列何者非強心配醣體之作用機制?(112-2)",o:["抑制心肌細胞之 Na⁺, K⁺-ATPase","增加心肌細胞內 Na⁺濃度","減少心肌細胞內 K⁺濃度","減少心肌細胞內 Ca⁺⁺濃度"],a:3,n:["強心苷的核心機制","Na⁺ 排出受阻,細胞內 Na⁺ 上升","K⁺ 回收受抑制,細胞內 K⁺ 下降","最終 Ca⁺⁺ 為增加而非減少,故選 D"]},
+{s:"強心配醣體",q:"下列何者不是 2,6-去氧己糖?(109-2)",o:["L-thevetose","D-digitoxose","L-oleandrose","D-cymarose"],a:0,n:["Thevetose 為 6-去氧-3-O-甲基己糖,不是 2,6-去氧糖","Digitoxose 為 2,6-去氧糖","Oleandrose 為 2,6-去氧糖","Cymarose 為 2,6-去氧糖"]},
+{s:"強心配醣體",q:"Digoxin 在血液中之含量,用下列何種方式檢測之靈敏度可達毫微克(ng)層次?(109-2)",o:["radioimmune assay","NMR technique","IR technique","fluorescence assay"],a:0,n:["放射免疫分析靈敏度高,可達 ng 層次","NMR 主要用於結構鑑定,靈敏度較低","IR 主要用於官能基鑑定","書中解答為放射免疫分析"]},
+{s:"強心配醣體",q:"強心配醣體之不飽和內酯環(lactone ring)接在那一位置之碳上?(109-1)",o:["C15","C16","C17","C18"],a:2,n:["非接合位置","非接合位置","不飽和內酯環接於 steroid 母核的 C17","非接合位置"]},
+{s:"強心配醣體",q:"下列何種生藥含蟾蜍二烯內酯(bufadienolides)之強心配醣體?(102-1)",o:["毛地黃葉(Digitalis leaf)","毛毛旋花子(Strophanthus)","鈴蘭(Convallaria)","海蔥(Squill)"],a:3,n:["毛地黃含 cardenolides(五員環內酯)","Strophanthus 含 cardenolides","鈴蘭含 cardenolides","海蔥含 bufadienolides(六員環雙烯內酯)"]},
+{s:"強心配醣體",q:"下列強心生藥,何者屬 Bufadienolides 型衍生物?(96-1)",o:["Digitalis","Strophanthus","Squill","Convallaria"],a:2,n:["屬 cardenolides 型","屬 cardenolides 型","Squill(海蔥)為 bufadienolides 型","屬 cardenolides 型"]},
+{s:"強心配醣體",q:"下列何種生藥不具強心作用?(113-2)",o:["white hellebore","oleander","apocynum","convallaria"],a:0,n:["白藜蘆為固醇類生物鹼,不是強心苷","夾竹桃含 oleandrin,有強心作用","Apocynum 含強心苷","鈴蘭含強心苷"]},
+{s:"強心配醣體",q:"下列何種生藥之基原植物不屬於夾竹桃科(Apocynaceae)?(113-2)",o:["dog bane","oleander","squill","strophanthus"],a:2,n:["Dog bane(Apocynum)屬夾竹桃科","夾竹桃屬夾竹桃科","Squill(海蔥)屬百合科","Strophanthus 屬夾竹桃科"]},
+{s:"強心配醣體",q:"有關 K-strophanthoside 與 ouabain 之敘述,下列何者錯誤?(112-2)",o:["兩者水解後均會釋放葡萄糖","兩者的非醣基部分皆屬於 cardenolide","後者可注射使用","後者的基原植物為 Strophanthus gratus"],a:0,n:["錯誤:ouabain 的醣基只有 Rhamnose,不含葡萄糖","兩者苷元皆為 cardenolide","Ouabain 可供注射","Ouabain 來自 S. gratus"]},
+{s:"強心配醣體",q:"下列強心苷之苷元(aglycon),何者屬於 bufadienolide 架構?(111-1)",o:["ouabain","scillaren A","K-strophanthoside","digitoxin"],a:1,n:["Ouabain 屬 cardenolide","Scillaren A(海蔥)屬 bufadienolide","屬 cardenolide","屬 cardenolide"]},
+{s:"強心配醣體",q:"下列生藥之活性成分,何者不屬強心苷?(110-2)",o:["strophanthus","centella","squill","convallaria"],a:1,n:["含強心苷","Centella(積雪草)主成分為三萜皂苷","含 bufadienolide 強心苷","含強心苷"]},
+{s:"強心配醣體",q:"下列有關強心配醣體基本骨架之敘述,何者錯誤?(110-1)",o:["C-3 位上 OH 為 β-型式","lactone ring 取代在 C-17 上","C-14 位上之 OH 為 α-型式","A/B/C/D 四個環連接方式為 cis-trans-cis"],a:2,n:["正確","正確","錯誤:C-14 的 OH 為 β-型式","正確"]},
+{s:"強心配醣體",q:"K-strophanthin-β 經 strophanthobiase 水解後,其產物為何?(109-2)",o:["cymarin + glucose","cyamrin + cymarose","strophanthidin + cymarose","strophanthidin + glucose"],a:0,n:["正確:去除末端葡萄糖,得 cymarin","非產物","非此酶的水解產物","非此酶的水解產物"]},
+{s:"強心配醣體",q:"有關 bufadienolides 的敘述,下列何者錯誤?(108-1)",o:["分離自蟾蜍(toads)的內臟","六員內酯環位在 C-17 上","屬於 24 個碳之強心配醣體","具固醇類架構"],a:0,n:["錯誤:蟾蜍來源為皮膚及腺體分泌物,而非內臟","正確","正確","正確"]},
+{s:"強心配醣體",q:"Cardiac glycosides 常見於下列何科別植物?(108-1)",o:["菊科","鉀葵科","夾竹桃科","繖形科"],a:2,n:["非主要來源","非主要來源","夾竹桃科(如夾竹桃、毒毛旋花子)含強心苷","非主要來源"]},
+{s:"強心配醣體",q:"下列何種天然物成分可來自動物性生藥?(108-1)",o:["bufadienolides","citric acid","digitoxin","ergotamine"],a:0,n:["蟾蜍含 bufadienolides,為唯一動物性強心苷來源","非強心苷","來自毛地黃(植物)","來自麥角菌(真菌)"]},
+{s:"強心配醣體",q:"下列何種生藥含 bufadienolide 類強心苷?(107-2)",o:["digitalis","white squill","convallaria","strophanthus"],a:1,n:["含 cardenolide","白海蔥含 scillarenin,屬 bufadienolide","含 cardenolide","含 cardenolide"]},
+{s:"配醣體",q:"下列何種生藥主含 rhein dianthrone glycosides 類成分?(113-2)",o:["rhubarb","aloe","senna","frangula"],a:2,n:["大黃主含 anthraquinone 類","蘆薈主含 aloin","番瀉葉含 sennoside(rhein 二蒽酮苷)","歐鼠李皮含 frangulin"]},
+{s:"配醣體",q:"下列生藥之主要醣苷成分,何者同時具有 C-及 O-glycoside 結構?(113-1)",o:["frangula","cascara sagrada","rhubarb","chrysarobin"],a:1,n:["僅 O-glycoside","Cascaroside 為 C- 及 O-glycoside","主要為 O-glycoside","非醣苷"]},
+{s:"配醣體",q:"下列何種蒽琨類配醣體之醣基只接在碳原子上?(112-2)",o:["frangulin A","aloin B","glucofrangulin A","cascaroside D"],a:1,n:["O-glycoside","Aloin 為純 C-glycoside","O-glycoside","C- 及 O-glycoside"]},
+{s:"配醣體",q:"Glucofrangulin A 結構中,葡萄糖基是接在苷元的那一個位置?(112-2)",o:["1","3","6","9"],a:0,n:["葡萄糖接在 C1,鼠李糖接在 C6","非接合位置","C6 接鼠李糖","非接合位置"]},
+{s:"配醣體",q:"下列何種生藥中所含的蒽醌苷主成分,其結構不含羧基?(111-2)",o:["cochineal","senna","rhubarb","cascara sagrada"],a:3,n:["胭脂蟲酸含羧基","Sennoside 含羧基","Rhein 含羧基","Cascaroside、Aloin 不含羧基"]},
+{s:"配醣體",q:"Frangulin A 酶解後可得到:(111-1)",o:["glucose + rhein","glucose + emodin","rhamnose + emodin","rhamnose + chrysophanol"],a:2,n:["錯誤","錯誤","Frangulin A = Emodin + Rhamnose","苷元為 emodin"]},
+{s:"配醣體",q:"Cascaroside A 含有 O-及 C-醣苷,其醣基與苷元連接位置分別是:(111-1)",o:["4,6 位","1,5 位","1,9 位","8,10 位"],a:3,n:["錯誤","錯誤","錯誤","O-醣在 C8,C-醣在 C10"]},
+{s:"配醣體",q:"Curacao aloe 之基原植物為:(110-2)",o:["Aloe barbadensis","Aloe ferox","Aloe africana","Aloe spicata"],a:0,n:["Curacao aloe 來自 A. barbadensis","Cape aloe 來源","非基原","非基原"]},
+{s:"配醣體",q:"下列何種生藥所含之配醣體,其苷元不屬於 anthraquinone 類?(110-1)",o:["cascara sagrada","aloe","rhubarb","wild cherry"],a:3,n:["屬蒽醌類","屬蒽醌類","屬蒽醌類","野櫻皮含氰配醣體"]},
+{s:"配醣體",q:"下列何種蒽琨類苷成分之致瀉作用最強?(108-2)",o:["frangulin A","frangulin B","glucofrangulin A","aloin A"],a:3,n:["較弱","較弱","較弱","依書中解答為 aloin A"]},
+{s:"配醣體",q:"下列何種生藥不具瀉下作用?(108-2)",o:["美鼠李皮","歐鼠李皮","蘆薈","野櫻皮"],a:3,n:["具瀉下作用","具瀉下作用","具瀉下作用","野櫻皮為鎮咳,不是瀉藥"]},
+{s:"配醣體",q:"Anthraquinone 成分於植物體內之生合成,係由下列何者頭-尾縮合而成?(108-1)",o:["HCOOH","CH3 COOH","CH3 CH2 COOH","CH3 CH2 CH2 COOH"],a:1,n:["非單元","Acetate-malonate pathway,以乙酸為單元","非單元","非單元"]},
+{s:"配醣體",q:"揮發油之芳香類化合物(aromatic compounds)是經由下列何種生合成路徑生成?(108-1)",o:["acetate-mevalonic acid pathway","acetate-malonic acid pathway","shikimic acid-phenylpropanoid pathway","amino acid pathway"],a:2,n:["此路徑生成萜類、固醇","此路徑生成蒽醌、脂肪酸","Shikimic acid 路徑生成苯丙烷類、芳香族","生成生物鹼"]},
+{s:"配醣體",q:"下列何者不常具有 anthraquinone glycoside?(107-1)",o:["Rhamnaceae","Liliaceae","Fabaceae","Ranunculaceae"],a:3,n:["鼠李科含有","百合科含有(蘆薈)","豆科含有(番瀉)","毛茛科不常見"]},
+{s:"配醣體",q:"下列何種配醣體水解後會產生鼠李糖與葡萄糖?(107-1)",o:["frangulin A","frangulin B","glucofrangulin A","glucofrangulin B"],a:2,n:["只產生鼠李糖","只產生芹菜糖","Glucofrangulin A 含 Rhamnose+Glucose","含 Apiose+Glucose"]},
+{s:"配醣體",q:"下列 anthraquinone 類配醣體,何者具有 9,10-dione 基團?(106-2)",o:["aloin B","cascaroside B","sennoside A","frangulin A"],a:3,n:["為蒽酮","為蒽酮","為二蒽酮","Frangulin 含 emodin,具 9,10-dione"]},
+{s:"配醣體",q:"下列有關醫療用蒽醌類生藥的敘述,何者錯誤?(101-2)",o:["為劇瀉藥","可促進腸道蠕動","",""].filter(Boolean).length?["為劇瀉藥","可促進腸道蠕動"]:[],a:0,n:["錯誤:蒽醌類為緩瀉藥或瀉劑","正確"]},
+{s:"配醣體",q:"Frangulin A 及 Frangulin B 之差異,主要在於:(101-1)",o:["糖基種類不同","糖基數目不同","糖基結合位置不同","糖基結合立體方位不同"],a:0,n:["A 為 Rhamnose,B 為 Apiose","相同","相同","相同"]},
+{s:"配醣體",q:"下列何種配醣體,其水解產物之 glycone 非為 glucose?(100-2)",o:["Amygdalin","Frangulin A","Aloin B","Salicin"],a:1,n:["水解得葡萄糖","Frangulin A 水解得 Rhamnose","Aloin 醣基為葡萄糖","水解得葡萄糖"]},
+{s:"配醣體",q:"鼠李皮在作藥用之前須經一年貯藏處理,使雙聚體型配醣體轉變成單體型配醣體,使其致瀉活性較溫和,此過程是屬於那一種反應?(100-2)",o:["氧化","還原","脫水","水解"],a:0,n:["貯存一年使蒽酮氧化為蒽醌","錯誤","錯誤","錯誤"]},
+{s:"配醣體",q:"人參皂苷 Rg1 之 C-20 位置所接之 R 基為何?(112-1)",o:["glucosyl","rhamnosyl","ribosyl","galactosyl"],a:0,n:["Rg1 為 (20S)-protopanaxatriol + 2 glucose","Rg1 不含鼠李糖","非 Rg1 的醣基","非 Rg1 的醣基"]},
+{s:"配醣體",q:"下列有關甘草的敘述,何者錯誤?(112-1)",o:["主成分 glycyrrhizin 為四環三萜類","含有黃酮類成分","具抗發炎的藥效","能調和諸藥"],a:0,n:["錯誤:glycyrrhizin 為五環三萜類(β-amyrin 型)","含 Liquiritin 等黃酮類","具抗發炎、袪痰等功效","甘草有調和諸藥之功"]},
+{s:"配醣體",q:"Glycyrrhizin 是屬於五環三萜類中的那一型結構?(111-2)",o:["α-amyrin","β-amyrin","lupine","dammarane"],a:1,n:["非此型","Glycyrrhizin 屬 β-amyrin 型","非此型","Dammarane 為四環三萜(人參皂苷)"]},
+{s:"配醣體",q:"下列何種皂苷之苷元不屬於固醇類?(111-1)",o:["sarsaponin","digitonin","saikosaponin A","dioscin"],a:2,n:["固醇類(菝葜)","固醇類(毛地黃)","柴胡皂苷為三萜類","固醇類(薯蕷,苷元 diosgenin)"]},
+{s:"配醣體",q:"遠志皂苷 onjisaponin E 之苷元化學骨架,其醣基連接位置為何?(110-1)",o:["2, 3","2, 23","3, 27","3, 28"],a:3,n:["錯誤","錯誤","錯誤","Onjisaponin E 醣基接在 C3 及 C28"]},
+{s:"配醣體",q:"下列有關甘草之敘述,何者正確?(109-2)",o:["glycyrrhetic acid 之甜度比蔗糖高","glycyrrhizin 水解後可得到葡萄糖","高血壓患者不宜過度使用","glycyrrhizin 屬於二萜類皂苷"],a:2,n:["甜味主成分為 glycyrrhizin,非其苷元","水解得 glucuronic acid,不是葡萄糖","Cortisol-like effect 會造成鈉瀦留、水腫,高血壓患者慎用","屬三萜類皂苷"]},
+{s:"配醣體",q:"龍舌蘭(agave)含那一種皂苷元(sapogenin),被用來作為製造 corticosteroids 的原料?(109-2)",o:["sarmentogenin","hecogenin","sarsapogenin","trigonelline"],a:1,n:["為強心苷元","Hecogenin 為龍舌蘭成分,用於製造 corticosteroids","為菝葜皂苷元","為生物鹼"]},
+{s:"配醣體",q:"人參成分 ginsenoside Rg1 之 aglycone 為:(108-2)",o:["α-amyrin","β-amyrin","(20S)-protopanaxatriol","(20S)-protopanaxadiol"],a:2,n:["非人參苷元","甘草類骨架","Rg1 苷元為 (20S)-protopanaxatriol","Rb1 等的苷元"]},
+{s:"配醣體",q:"下列何者為花旗參(American ginseng)之植物基原?(108-1)",o:["Panax ginseng","Panax quinquefolius","Panax notoginseng","Panax transitorius"],a:1,n:["人參","花旗參為 Panax quinquefolius","三七","非花旗參基原"]},
+{s:"配醣體",q:"下列何種醣苷(glycoside)屬於 cyanogenic glycoside?(112-2)",o:["amygdalin","arbutin","salicin","sinalbin"],a:0,n:["Amygdalin 為氰苷","酚苷","酚苷","硫苷(白芥子)"]},
+{s:"配醣體",q:"野櫻樹皮用於咳嗽製劑,其所含野櫻苷(prunasin)屬於下列何類成分?(111-2)",o:["isothiocyanate glycoside","cyanogenic glycoside","anthraquinone glycoside","flavonoid glycoside"],a:1,n:["如 sinigrin","Prunasin 為氰配醣體","如 aloin","如 rutin"]},
+{s:"配醣體",q:"下列何者與 prunasin 生合成之過程無關?(111-1)",o:["phenylalanine","phenylacetaldoxime","uridine diphosphate","prunasin hydrolase"],a:3,n:["前驅物為 Phenylalanine","合成中間體","UDP-glucose 供醣基","Prunasin hydrolase 是水解酶,屬分解而非合成"]},
+{s:"配醣體",q:"Prunasin 與 sambunigrin 在化學結構上互為:(110-2)",o:["非鏡像異構物","鏡像異構物","順式異構物","反式異構物"],a:0,n:["兩者僅氰基碳 R/S 構型不同,醣基相同,為非鏡像異構物","鏡像異構物需所有手性中心相反","非此關係","非此關係"]},
+{s:"配醣體",q:"Amygdalin 經 amygdalin hydrolase(amygdalase)水解後形成的產物含有幾個單醣基?(109-1)",o:["1","2","3","4"],a:0,n:["依書中解答為 1(產物 prunasin 含 1 個葡萄糖基)","Amygdalin 共 2 個葡萄糖,完全水解才分為兩個","錯誤","錯誤"]},
+{s:"配醣體",q:"關於 garlic 的敘述,下列何者錯誤?(113-2)",o:["基原植物為 Allium sativum (Liliaceae)","其完整細胞中主含 allicin","經壓碎後,產生的獨特味道成分之一為 diallyl disulfide","具有抗凝血、降血脂、抗菌等作用"],a:1,n:["正確","錯誤:完整細胞中主含 alliin(無臭),壓碎後經 alliinase 才生成 allicin","正確","正確"]},
+{s:"配醣體",q:"下列俗名與學名之配對,何者正確?(113-1)",o:["bitter almond-Prunus armeniaca","wild cherry-Brassica nigra","American ginseng-Panax quinquefolius","cascara sagrada-Rhamnus frangula"],a:2,n:["苦杏仁為 Prunus armeniaca,bitter almond 不是","野櫻為 Prunus serotina;Brassica nigra 為黑芥子","花旗參為 Panax quinquefolius","美鼠李皮為 Rhamnus purshiana"]},
+{s:"配醣體",q:"黑芥子苷(sinigrin)經 myrosinase 水解後產生的苷元為:(112-2)",o:["allyl isothiocyanate","benzaldehyde","p-hydroxybenzyl isothiocyanate","mandelonitrile"],a:0,n:["Sinigrin → Allyl isothiocyanate + Glucose + KHSO₄","為苦杏仁苷產物","為白芥子苷 sinalbin 的產物","為氰苷的中間產物"]},
+{s:"配醣體",q:"下列何者非 sinigrin 經 myrosinase 水解之產物?(110-2)",o:["glucose","allyl isothiocyanate","rhamnose","potassium hydrogen sulfate"],a:2,n:["產物之一","產物之一","Sinigrin 水解不產生鼠李糖","KHSO₄ 為產物之一"]},
+{s:"配醣體",q:"Sinigrin 經過 myrosinase 催化水解後,產生 allyl isothiocyanate,即其 allyl group 會轉移至下列那個位置?(109-2)",o:["1","2","3","4"],a:1,n:["錯誤","依書中解答為 2(Allyl group 由碳轉移至氮)","錯誤","錯誤"]},
+{s:"配醣體",q:"經過 myrosinase 水解會產生 p-hydroxybenzyl isothiocyanate 之醣苷為下列何者?(109-1)",o:["glucovanillic alcohol","salicin","sinigrin","sinalbin"],a:3,n:["水解得 vanillic alcohol","水解得 saligenin","產生 allyl isothiocyanate","Sinalbin(白芥子)→ p-hydroxybenzyl isothiocyanate"]},
+{s:"配醣體",q:"大蒜具有抑制血小板凝集之作用,主要活性成分為何?(109-1)",o:["(Z)-ajoene","alliin","allicin","allyl isothiocyanate"],a:0,n:["(Z)-ajoene 可抑制血小板凝集(Z form 效果較好)","Alliin 為無臭成分","Allicin 為大蒜主要活性及獨特味道成分","為芥子油"]},
+{s:"配醣體",q:"柳樹皮常用來治療風濕痛,主要是因為含有下列何種成分?(113-2)",o:["arbutin","avenein","alliin","salicin"],a:3,n:["Arbutin 為熊果葉成分,用於尿道防腐","非柳樹皮成分","Alliin 為大蒜成分","Salicin 水解得 saligenin,體內氧化為水楊酸,具抗風濕作用"]},
+{s:"配醣體",q:"下列生藥與其效成分化學分類之配對,何者錯誤?(113-1)",o:["senna-anthraquinone glycoside","aloe-anthraquinone glycoside","vanilla-aldehyde glycoside","mustard-phenol glycoside"],a:3,n:["正確","正確","正確","錯誤:芥子含 sinigrin/sinalbin,屬異硫氰配醣體(S-glycoside)"]},
+{s:"配醣體",q:"下列何種配醣體,其水解後之產物不含 glucose?(113-1)",o:["amygdalin","frangulin A","sennoside A","salicin"],a:1,n:["水解得 glucose","Frangulin A = emodin + rhamnose,不含 glucose","水解得 glucose","水解得 glucose + saligenin"]},
+{s:"配醣體",q:"下列有關生藥及其功用與使用部位之配對,何者錯誤?(113-1)",o:["大黃(rheum)-瀉劑-根莖和根","苦杏仁(apricot pits)-鎮咳-種仁","毛地黃(digitalis)-強心-根部","熊果(uva ursi)-收斂-葉部"],a:2,n:["正確","正確","錯誤:毛地黃藥用部位為乾燥葉,不是根部","正確"]},
+{s:"配醣體",q:"有關 salicylic acid 之敘述,下列何者正確?(112-2)",o:["僅存在柳屬(Salix sp.)植物","為 salicyl alcohol glucoside 之同物異名","具抗發炎、鎮痛及解熱效果,不會引起口腔、食道、胃之刺激","可用於製備 aspirin,aspirin 命名之語源來自 acetyl spiric acid"],a:3,n:["錯誤:亦存在於其他植物","錯誤:salicyl alcohol glucoside 為 salicin","錯誤:水楊酸對黏膜有刺激性","正確"]},
+{s:"配醣體",q:"下列有關醣苷類之綜合敘述,何者正確?(112-1)",o:["Salix purpurea 使用部位為葉子","salicin 具抗風濕活性","商業上大多數 vanillin 之合成來自於 gallic acid","vanillin 為 glucovanillic alcohol 之苷元(aglycone)"],a:1,n:["使用部位為樹皮","Salicin 體內氧化為水楊酸,具抗風濕作用","Vanillin 可由 coniferin、eugenol、lignin 等合成","Vanillin 是 glucovanillin 水解後的苷元"]},
+{s:"配醣體",q:"Salicin 由柳樹皮製備過程中,須加入乙酸鉛以除去單寧,過剩之鉛離子如何去除?(111-1)",o:["加入硫化氫","加入鉻酸","加入硫酸","加入氫氧化鈉"],a:0,n:["加入硫化氫使鉛離子沉澱為硫化鉛去除","錯誤","錯誤","錯誤"]},
+{s:"配醣體",q:"下列熊果葉(uva ursi)所含之成分,何者屬於醣苷(glycoside)?(110-1)",o:["ursolic acid","ellagic acid","arbutin","quercetin"],a:2,n:["屬三萜酸","屬鞣質相關成分","Arbutin 為 O-glycoside,水解得 hydroquinone + glucose","屬黃酮苷元"]},
+{s:"配醣體",q:"Salicin 屬於下列何種類型?(108-2)",o:["cyanogenic glycosides","anthraquinone glycosides","alcohol glycosides","aldehyde glycosides"],a:2,n:["如 prunasin","如 aloin","Salicin 水解得 saligenin(水楊醇),為醇類配醣體","如 vanillin 相關醣苷"]},
+{s:"配醣體",q:"下列何種生藥之主成分屬 alcohol glycoside?(107-1)",o:["Salix purpurea","Prunus armeniaca","Brassica nigra","Arctostaphylos uva-ursi"],a:0,n:["柳樹皮含 salicin(醇類配醣體)","苦杏仁含 amygdalin(氰苷)","黑芥子含 sinigrin(異硫氰苷)","熊果含 arbutin(酚類配醣體)"]},
+{s:"配醣體",q:"毛地黃(Digitalis purpurea)不含下列何種強心苷?(108-2)",o:["digitoxin","gitoxin","gitaloxin","digoxin"],a:3,n:["毛地黃含 digitoxin","毛地黃含 gitoxin(水解得 gitoxigenin)","毛地黃含 gitaloxin","Digoxin 來自長葉毛地黃(D. lanata),不在毛地黃中"]},
+{s:"配醣體",q:"毛地黃和長葉毛地黃的比較,何者錯誤?(107-2)",o:["兩者皆具有強心苷成分","共有的苷元(aglycone)為 digitoxigenin","前者為藥用 digoxin 的來源","後者又稱作 grecian foxglove"],a:2,n:["兩者都含強心苷","兩者均含 digitoxigenin 系苷元","錯誤:digoxin 來自長葉毛地黃,而非毛地黃","長葉毛地黃又稱 Grecian foxglove"]},
+{s:"生物鹼",q:"下列生物鹼,何者不屬於含氮雜環結構型的化合物?(113-2)",o:["cathinone","nicotine","atropine","quinine"],a:0,n:["Cathinone 為苯乙胺類(非雜環)生物鹼","含 pyridine、pyrrolidine 雜環","含 tropane 雜環","含 quinoline 雜環"]},
+{s:"生物鹼",q:"下列何種生物鹼具有 tropane 架構?(113-2)",o:["ergotamine","strychnine","caffeine","scopolamine"],a:3,n:["屬 indole 類","屬 indole 類","屬 purine 類","Scopolamine 為 tropane 類"]},
+{s:"生物鹼",q:"Caffeine 之化學結構(如下圖)屬於下列何種母分類?(113-2)",o:["pyrimidine","purine","piperidine","imidazole"],a:1,n:["Pyrimidine 僅為六員環部分","Caffeine 為 purine(嘌呤)類","非此類","非此類"]},
+{s:"生物鹼",q:"下列化合物與主要用途之配對,何者錯誤?(113-2)",o:["papaverine hydrochloride-肌肉鬆弛劑","codeine sulfate-止咳劑","emetine hydrochloride-催吐劑","hydromorphone hydrochloride-中樞興奮劑"],a:3,n:["正確","正確","正確","錯誤:hydromorphone 為麻醉性鎮痛劑"]},
+{s:"生物鹼",q:"下列生物鹼成分,何者具 phthalideisoquinoline 骨架?(113-2)",o:["hydrastine","berberine","canadine","cephaeline"],a:0,n:["Hydrastine 屬 phthalideisoquinoline","屬 protoberberine","屬 protoberberine","屬 emetine 類"]},
+{s:"生物鹼",q:"關於生物鹼成分與其基本骨架配對,下列何者錯誤?(113-2)",o:["cinchonine - quinoline","morphine - isoquinoline","reserpine - indole","pilocarpine - pyrrolidine"],a:3,n:["正確","正確","正確","錯誤:pilocarpine 為 imidazole 類"]},
+{s:"生物鹼",q:"單萜類(Monoterpenoids)為 indole alkaloids 生合成前驅物時,下列何者不是常見之終產物架構型?(113-2)",o:["bornane","aspidospermane","ibogane","corynane"],a:0,n:["Bornane 非 indole alkaloid 常見型","Aspidospermane 為常見型","Ibogane 為常見型","Corynane 為常見型"]},
+{s:"生物鹼",q:"下列生藥與其基原植物所屬科別之配對,何者正確?(113-1)",o:["belladonna-Solanaceae","cinchona-Rutaceae","nux vomica-Apocynaceae","veratrum viride-Rubiaceae"],a:0,n:["顛茄為茄科","金雞納為茜草科(Rubiaceae)","馬錢子為馬錢科","藜蘆為百合科"]},
+{s:"生物鹼",q:"生藥藜蘆(Veratrum)藥效成分屬於下列何種生物鹼?(113-1)",o:["steroidal","diterpenoid","piperidine","pyrrolidine"],a:0,n:["藜蘆含固醇類生物鹼","非此類","非此類","非此類"]},
+{s:"生物鹼",q:"有關生藥之別名配對,下列何者錯誤?(113-1)",o:["physostigma-ordeal bean","hydrastis-goldenseal","stramonium-jaborandi","sanguinaria-bloodroot"],a:2,n:["正確","正確","錯誤:stramonium 為曼陀羅葉,jaborandi 是毛果蕓香","正確"]},
+{s:"生物鹼",q:"有關古柯鹼(cocaine)的敘述,下列何者錯誤?(113-1)",o:["其骨架屬於 tropane 類","具有雙酯結構(diester)","具局部麻醉作用","benzaldehyde 為其水解產物之一"],a:3,n:["正確","正確","正確","錯誤:水解產物為 ecgonine、benzoic acid、methanol,不含 benzaldehyde"]},
+{s:"生物鹼",q:"下列生藥何者過量使用會造成視聽障礙?(113-1)",o:["cinchona","coca","stramonium","hydrastis"],a:0,n:["金雞納過量可致 cinchonism(耳鳴、視力障礙)","古柯主要為成癮性","曼陀羅主要為抗膽鹼性毒性","北美黃連不是主要視聽毒性"]},
+{s:"生物鹼",q:"下列化合物,何者具有酚基(Phenolic group)?(113-1)",o:["morphine","codeine","heroin","thebaine"],a:0,n:["Morphine 的 C3-OH 為酚基","Codeine 的 C3 已甲基化","Heroin 為二乙醯基化,無自由酚基","Thebaine 無自由酚基"]},
+{s:"生物鹼",q:"Pilocarpine 具下列何種結構?(112-2)",o:["lactone、imidazole","lactone、indole","lactam、imidazole","lactam、indole"],a:0,n:["Pilocarpine 含 lactone 環與 imidazole 環","非 indole","非 lactam","錯誤"]},
+{s:"生物鹼",q:"Catharanthine 具下列何種骨架?(112-2)",o:["ibogane","aspidospermane","morphinan","corynane"],a:0,n:["Catharanthine 屬 ibogane 型","Vindoline 屬 aspidospermane","為嗎啡類骨架","非此型"]},
+{s:"生物鹼",q:"下列生藥基原植物與主要作用之配對,何者正確?(112-2)",o:["Papaver somniferum-鎮痛","Rauvolfia serpentina-縮瞳","Strychnos yohimbe-降壓","Pausinystalia yohimbe-降血糖"],a:0,n:["罌粟可提供嗎啡類鎮痛劑","Rauvolfia 為降血壓","Yohimbe 基原為 Pausinystalia","Pausinystalia yohimbe 非降血糖"]},
+{s:"生物鹼",q:"下列何種胺基酸為骨骼肌鬆弛劑 d-tubocurarine 的生合成前驅物?(112-2)",o:["anthranilic acid","histidine","lysine","tyrosine"],a:3,n:["非其前驅物","非此前驅物","非此前驅物","Curare 類(isoquinoline 類)由 tyrosine 生合成"]},
+{s:"生物鹼",q:"下列何者不是箭毒(Curare)的植物基原?(112-2)",o:["Strychnos toxifera","Strychnos nux-vomica","Strychnos castelnaei","Strychnos crevauxii"],a:1,n:["箭毒基原之一","馬錢子含 strychnine,不是箭毒基原","箭毒基原之一","箭毒基原之一"]},
+{s:"生物鹼",q:"下列生物鹼,何者不屬 tropine 之衍生物?(112-2)",o:["hyoscyamine","atropine","scopolamine","hygroline"],a:3,n:["Tropine 酯類","Tropine 酯類","Tropine 類衍生物","Hygroline 為 pyrrolidine 類,非 tropine 衍生物"]},
+{s:"生物鹼",q:"下列含咖啡因之生藥與其基原植物科別,何者正確?(112-2)",o:["coffee-Rubiaceae","paraguay tea-Sterculiaceae","cola-Sapindaceae","tea-Aquifoliaceae"],a:0,n:["咖啡屬茜草科","巴拉圭茶屬冬青科","可拉屬梧桐科","茶屬山茶科"]},
+{s:"生物鹼",q:"下列生物鹼與其骨架結構之配對,何者錯誤?(112-2)",o:["arecoline-pyridine and piperidine","cinchonine-quinoline","strychnine-imidazole","theobromine-purine"],a:2,n:["正確","正確","錯誤:strychnine 為 indole 類","正確"]},
+{s:"生物鹼",q:"下列有關生物鹼的敘述,何者錯誤?(112-1)",o:["與碘化鉍鉀試劑(Dragendorff's reagent)作用呈現深藍色","加入過氯酸鈉(Sodium perchlorate)會產生白色沉澱","和雷氏鹽(Reinecke's salt)作用會產生沉澱","三級性生物鹼可應用酸萃取得到該類成分"],a:0,n:["錯誤:Dragendorff 試劑呈橙紅色沉澱,非深藍","正確","正確","正確"]},
+{s:"生物鹼",q:"下列生物鹼何者在常溫下呈液態?(112-1)",o:["nicotine","cocaine","hydrastine","atropine"],a:0,n:["Nicotine 常溫為液態生物鹼","固態","固態","固態"]},
+{s:"生物鹼",q:"下列何者不屬於 pyridine-piperidine alkaloids?(112-1)",o:["putrescine","lobeline","arecoline","nicotine"],a:0,n:["Putrescine 為幾烷類前驅(非此類)","Lobeline 屬 piperidine 類","Arecoline 屬此類","Nicotine 屬此類"]},
+{s:"生物鹼",q:"Vinca alkaloids 之結構是屬於下列何種類骨架?(112-1)",o:["indole","quinoline","isoquinoline","imidazole"],a:0,n:["Vinblastine、vincristine 為 indole 類","非此類","非此類","非此類"]},
+{s:"生物鹼",q:"箭毒是從植物 Strychnos toxifera 之何部位得到之萃取物?(112-1)",o:["皮部與莖部","莖部與葉部","根莖部與根部","果實與種子"],a:0,n:["箭毒取自皮部與莖部","錯誤","錯誤","果實與種子為馬錢子(strychnine)來源"]},
+{s:"生物鹼",q:"下列何者不屬於 Veratrum alkaloids 之 group I 的化合物?(112-1)",o:["scillaren A","veratridine","germidine","cevadine"],a:0,n:["Scillaren A 為海蔥的強心苷,非 Veratrum 生物鹼","屬 Veratrum 生物鹼","屬 Veratrum 生物鹼","屬 Veratrum 生物鹼"]},
+{s:"生物鹼",q:"清熱藥黃柏(Phellodendri Cortex)中生物鹼 phellodendrine 之骨架為何?(112-1)",o:["quinoline","isoquinoline","pyridine-piperidine","purine"],a:1,n:["非此類","Phellodendrine 屬 isoquinoline 類","非此類","非此類"]},
+{s:"生物鹼",q:"(-)-Scopolamine 相較於(-)-hyoscyamine 之結構,有何差異?(112-1)",o:["多一個 epoxide","少一個 epoxide","少一個 N-methyl","多一個 2-carbomethoxy"],a:0,n:["Scopolamine 比 hyoscyamine 多一個環氧(epoxide)","錯誤","兩者皆有 N-methyl","此為 cocaine 的特徵"]},
+{s:"生物鹼",q:"Theobroma cacao 種子經熟成(curing process),由白色變成暗紅棕色,再經碾壓製成巧克力(chocolate)。下列何者為此暗紅棕色素的前驅物質?(112-1)",o:["epicatechin","theobromine","caffeine","sesamol"],a:0,n:["依書中解答為 epicatechin(多酚)","Theobromine 為生物鹼,非色素前驅","Caffeine 為生物鹼","非此前驅物"]},
+{s:"生物鹼",q:"下列何者不是 nicotine 生合成的前驅物或中間體?(111-2)",o:["quinic acid","quinolinic acid","nicotinic acid","ornithine"],a:0,n:["Quinic acid 不參與 nicotine 生合成","Quinolinic acid 為 nicotinic acid 的前驅","Nicotinic acid 提供吡啶環","Ornithine 提供吡咯烷環"]},
+{s:"生物鹼",q:"下列生藥與其作用之配對,何者錯誤?(111-2)",o:["areca-驅蟲","pomegranate-驅蟲","lobelia-催吐","pilocarpus-散瞳"],a:3,n:["檳榔可驅蟲","石榴皮可驅蟲","Lobelia 有催吐作用","錯誤:pilocarpine 為縮瞳劑,非散瞳"]},
+{s:"生物鹼",q:"金雞納樹皮之水溶液加溴試液及氨試液即呈翠綠色,代表含有 quinine 及 quinidine 生物鹼,此檢驗方法稱為?(111-2)",o:["thalleioquin test","Dragendorff's test","Mayer's test","Fehling's test"],a:0,n:["Thalleioquin test 為 quinine/quinidine 的專屬呈色試驗","為生物鹼一般沉澱試劑","為生物鹼一般沉澱試劑","用於還原糖檢驗"]},
+{s:"生物鹼",q:"下列何者與 quinine 之生合成無關?(111-2)",o:["經由 monoterpenoid-tryptophan pathway","secologanin 為其前驅物之一","經重排形成 quinuclidine ring","具 N-methylpyrrolinium ion 之中間體"],a:3,n:["相關","相關","相關","無關:N-methylpyrrolinium 為 tropane/nicotine 的中間體"]},
+{s:"生物鹼",q:"下列中藥何者不含 berberine?(111-2)",o:["黃柏","黃耆","黃連","黃皮樹"],a:1,n:["黃柏含 berberine","黃耆主要含黃酮與皂苷,不含 berberine","黃連含 berberine","黃皮樹為黃柏基原"]},
+{s:"生物鹼",q:"經生合成研究證實,下列何者非 caffeine 所含氮原子之來源?(111-2)",o:["aspartic acid","glutamine","glycine","serine"],a:3,n:["提供氮原子","提供氮原子","提供氮原子","Serine 不是氮原子來源"]},
+{s:"生物鹼",q:"下列何者為 colchicine 生合成之前驅物?(111-2)",o:["lysine、aspartic acid","ornithine、mevalonic acid","phenylalanine、tyrosine","tryptophan、secologanin"],a:2,n:["為 pipecolic 類前驅","為其他類前驅","Colchicine 由 phenylalanine 與 tyrosine 生合成","為 indole 類前驅"]},
+{s:"生物鹼",q:"下列生物鹼所含成分及其治療用途之配對,何者錯誤?(111-1)",o:["vinca:vinblastine、anti-neoplasm","cinchona:quinine、anti-malaria","pilocarpus:physostigmine、anti-glaucoma","ergot:ergotamine、anti-migraine"],a:2,n:["正確","正確","錯誤:pilocarpus 含 pilocarpine;physostigmine 來自 physostigma","正確"]},
+{s:"生物鹼",q:"中藥黃連(Coptidis Rhizoma)藥效成分 berberine 屬於下列何種生物鹼?(111-1)",o:["quinoline","isoquinoline","pyridine-piperidine","purine"],a:1,n:["非此類","Berberine 屬 isoquinoline(protoberberine)","非此類","非此類"]},
+{s:"生物鹼",q:"下列何者為 phthalideisoquinoline 類生物鹼?(111-1)",o:["hydrastine","physostigmine","brucine","physovenine"],a:0,n:["Hydrastine 為 phthalideisoquinoline 類","屬 indole 類","屬 indole 類","非此類"]},
+{s:"生物鹼",q:"下列何者為血根(bloodroot)的基原植物?(111-1)",o:["Sanguinaria canadensis","Cephaelis ipecacuanha","Hydrastis canadensis","Strychnos castelnaei"],a:0,n:["血根基原為 Sanguinaria canadensis","為吐根(ipecac)","為北美黃連(goldenseal)","為箭毒基原之一"]},
+{s:"生物鹼",q:"下列何種成分因具有骨骼肌鬆弛作用,可用兔子垂頭試驗作為效價測定?(111-1)",o:["reserpine","hydrastine","sanguinarine","tubocurarine chloride"],a:3,n:["降血壓藥","治療用途不同","殺菌用途","Tubocurarine 為骨骼肌鬆弛劑,用兔頭垂試驗測效價"]},
+{s:"生物鹼",q:"N-Methylpyrrolinium ion 是 nicotine 生合成之重要中間產物,其前驅物為何?(111-1)",o:["lysine","glycine","ornithine","phenylalanine"],a:2,n:["Lysine 是 piperidine 類前驅","非此前驅物","Ornithine 經 putrescine 形成 N-methylpyrrolinium","非此前驅物"]},
+{s:"生物鹼",q:"下列何種生物鹼之基本骨架與其他三種不同?(111-1)",o:["mescaline","cathinone","ephedrine","theophylline"],a:3,n:["苯乙胺類","苯乙胺類","苯乙胺類","Theophylline 屬 purine 類"]},
+{s:"生物鹼",q:"下列何者非生物鹼之檢測試劑?(110-2)",o:["Dragendorff's 試劑","Mayer's 試劑","Fehling's 試劑","Wagner's 試劑"]
+,a:2,n:["生物鹼檢測試劑","生物鹼檢測試劑","Fehling's 用於還原糖檢驗","生物鹼檢測試劑"]},
+{s:"生物鹼",q:"下列何成分之生合成前驅物不是 tryptophan?(110-2)",o:["strychnine","physostigmine","quinine","papaverine"],a:3,n:["由 tryptophan 生合成","由 tryptophan 生合成","由 tryptophan 與 secologanin","Papaverine 由 tyrosine 生合成"]},
+{s:"生物鹼",q:"下列生藥,何者不富含 caffeine?(110-2)",o:["coffee bean","guarana","maté","tonka bean"],a:3,n:["咖啡豆含 caffeine","瓜拉納含 caffeine","巴拉圭茶含 caffeine","Tonka bean 不富含 caffeine"]},
+{s:"生物鹼",q:"Strychnine 化學結構如下,其生合成前驅物(precursor)及骨架類型為何?(110-1)",o:["ornithine;ajmaline","phenylalanine;aspidospermane","tryptophan;corynane","tyrosine;ibogane"],a:2,n:["錯誤","錯誤","Strychnine 由 tryptophan 生合成,骨架為 corynane","錯誤"]},
+{s:"生物鹼",q:"下列何種生藥具抗癌作用且其植物基原為夾竹桃科?(110-1)",o:["Catharanthus roseus","Colchicum autumnale","Rauvolfia serpentina","Taxus brevifolia"],a:0,n:["長春花屬夾竹桃科,含 vinblastine、vincristine","秋水仙屬百合科","蓖木屬夾竹桃科,但主要為降血壓","紅豆杉屬紅豆杉科"]},
+{s:"生物鹼",q:"Quinine 生合成之前驅物為何?(110-1)",o:["tryptophan、secologanin","tyramine、loganin","phenylalanine、secologanin","dopamine、loganin"],a:0,n:["Quinine 由 tryptophan 與 secologanin 生合成","錯誤","錯誤","錯誤"]},
+{s:"生物鹼",q:"下列生藥與使用部位之配對,何者錯誤?(110-1)",o:["corydalis-塊莖","opium-成熟果實","ipecac-根莖及根","sanguinaria-根莖"],a:1,n:["正確","錯誤:鴨片為未成熟果實之乳汁","正確","正確"]},
+{s:"生物鹼",q:"下列生物鹼,何者不是分離自北美黃連(goldenseal)?(110-1)",o:["hydrastine","berberine","canadine","cephaeline"],a:3,n:["北美黃連含 hydrastine","黃連含 berberine","黃連含 canadine","Cephaeline 為吐根(ipecac)成分"]},
+{s:"生物鹼",q:"有關 berberine 之敘述,下列何者錯誤?(110-1)",o:["具 indole 構造","屬四級生物鹼","為黃柏皮之成分","具抗菌作用"],a:0,n:["錯誤:berberine 為 isoquinoline 類","正確","正確","正確"]},
+{s:"生物鹼",q:"下列何者不屬於茭科生物鹼(Solanaceous alkaloids)?(110-1)",o:["hyoscyamine","atropine","scopolamine","hygroline"],a:3,n:["茭科生物鹼","茭科生物鹼","茭科生物鹼","Hygroline 為古柯成分之一,不屬茭科生物鹼"]},
+{s:"生物鹼",q:"下列生藥與其使用部位之配對,何者錯誤?(110-1)",o:["Rhamnus purshianus-bark","Veratrum viride-seed","Digitalis lanata-leaf","Cassia acutifolia-leaflet"],a:1,n:["美鼠李用樹皮","錯誤:藜蘆用根莖及根,非種子","長葉毛地黃用葉","番瀉葉用小葉"]},
+{s:"生物鹼",q:"下列生藥所含之主成分,何者屬於 alkaloidal amine?(110-1)",o:["ergot","green hellebore","abyssinian tea","nux vomica"],a:2,n:["麥角含 indole 類生物鹼","綠藜蘆含固醇類生物鹼","阿比西尼亞茶(khat)含 cathinone,屬 alkaloidal amine","馬錢子含 indole 類生物鹼"]},
+{s:"生物鹼",q:"常用生物鹼試劑 Dragendorff's reagent 所含之試藥為何?(109-2)",o:["potassium mercuric iodide","iodine in potassium iodide","potassium bismuth iodide","saturated solution of picric acid"],a:2,n:["為 Mayer's 試劑","為 Wagner's 試劑","Dragendorff's 試劑為碘化鉍鉀(potassium bismuth iodide)","為 Hager's 試劑"]},
+{s:"生物鹼",q:"下列何者為毒扁豆的基原植物?(109-2)",o:["Physostigma venenosum","Strychnos nux-vomica","Glycine hispida","Chondrodendron tomentosum"],a:0,n:["毒扁豆(ordeal bean)為 Physostigma venenosum","為馬錢子","為大豆屬","為箭毒基原之一"]},
+{s:"生物鹼",q:"麥角生物鹼(ergot alkaloids),何者之水溶性最佳?(109-2)",o:["ergonovine","ergotamine","methylergonovine","ergotaminine"],a:0,n:["Ergonovine 為水溶性麥角生物鹼","屬脂溶性,水溶性較差","為半合成衍生物","為 ergotamine 的異構物"]},
+{s:"生物鹼",q:"有關長春花(catharanthus)所含 indole 類生物鹼的敘述,下列何者錯誤?(109-2)",o:["抗癌主成分具 bisindole 結構","vindesine 為半合成產物","sesquiterpenoid 為其生合成前驅物之一","抗癌機轉之一為抑制細胞有絲分裂"],a:2,n:["正確","正確","錯誤:前驅物為 monoterpenoid(secologanin)","正確"]},
+{s:"生物鹼",q:"金雞納樹種植多少年時,其生物鹼的產率最高?(109-2)",o:["6~9","2~4","11~13","15~17"],a:0,n:["依書中解答為 6~9 年","年限過短","年限過長","年限過長"]},
+{s:"生物鹼",q:"下列生物鹼,何者不具 purine 結構?(109-2)",o:["theobromine","mescaline","xanthine","caffeine"],a:1,n:["Purine 類","Mescaline 為苯乙胺類","Purine 類","Purine 類"]},
+{s:"生物鹼",q:"檳榔(Arecae Semen)所含 arecoline,具下列何種化學結構?(109-1)",o:["quinoline","pyrrolidine","pyridine-piperidine","purine"],a:2,n:["非此類","非此類","Arecoline 屬 pyridine-piperidine 類","非此類"]},
+{s:"生物鹼",q:"Tryptophan 不是下列何種生物鹼生合成之前驅物?(109-1)",o:["ergometrine","quinine","emetine","physostigmine"],a:2,n:["由 tryptophan 生合成","由 tryptophan 與 secologanin 生合成","Emetine 由 tyrosine 與 secologanin 生合成","由 tryptophan 生合成"]},
+{s:"生物鹼",q:"下列有關麥角(ergot)之敘述,何者錯誤?(109-1)",o:["lysergic acid 生合成之前驅物之一為 tryptophan","藥用部位為菌核","lysergic acid diethylamide 具有迷幻作用","ergotamine 為水溶性生物鹼"],a:3,n:["正確","正確","正確(LSD)","錯誤:ergotamine 為脂溶性生物鹼,水溶性者為 ergonovine"]},
+{s:"生物鹼",q:"下列 isoquinoline 成分與其次分類(subgroup)之配對,何者錯誤?(109-1)",o:["papaverine-benzylisoquinoline","tubocurarine-benzophenanthridine","hydrastine-phthalideisoquinoline","thebaine-morphinan"],a:1,n:["正確","錯誤:tubocurarine 為 bisbenzylisoquinoline","正確","正確"]},
+{s:"生物鹼",q:"烏藥(Linderae Radix)中所含 hernandine(結構如圖)之結構具下列何種骨架?(109-1)",o:["quinoline","isoquinoline","indole","tropane"],a:1,n:["非此類","Hernandine 屬 isoquinoline(aporphine)類","非此類","非此類"]},
+{s:"生物鹼",q:"Cocaine 之基本骨架為:(109-1)",o:["ecgonine","secologanin","α-truxilline","strictosidine"],a:0,n:["Cocaine 之基本骨架為 ecgonine(tropane 類)","為單萜類前驅物","為古柯其他成分","為 indole 類中間體"]},
+{s:"生物鹼",q:"下列含 tropane alkaloids 的生藥中,何者之基原植物不屬於 Solanaceae?(109-1)",o:["datura","duboisia","Hyoscyamus","coca"],a:3,n:["曼陀羅屬茭科","Duboisia 屬茭科","Hyoscyamus(菥蔬)屬茭科","古柯(coca)屬 Erythroxylaceae"]},
+{s:"生物鹼",q:"所示結構為下列何種生物鹼?(109-1)",o:["hyoscyamine","reserpine","ephedrine","lobeline"],a:2,n:["Hyoscyamine 為 tropane 類","Reserpine 為 indole 類","結構為苯異丙醇胺(PhCH(OH)CH(CH₃)NHCH₃),即 ephedrine","Lobeline 為 piperidine 類"]},
+{s:"生物鹼",q:"下列何者是由碘-碘化鉀溶液(iodine/potassium iodide)所組成?(108-2)",o:["Bertrand 試劑","Dragendorff 試劑","Mayer 試劑","Wagner 試劑"],a:3,n:["Bertrand 試劑為 silicotungstic acid","Dragendorff 為碘化鉍鉀","Mayer 為碘化汞鉀","Wagner 試劑為 iodine in potassium iodide"]},
+{s:"生物鹼",q:"下列生物鹼之生合成,何者沒有單萜類參與?(108-2)",o:["reserpine","colchicine","quinine","vincristine"],a:1,n:["有 secologanin(單萜)參與","Colchicine 由 phenylalanine 與 tyrosine 生合成,無單萜","有 secologanin 參與","有 secologanin 參與"]},
+{s:"生物鹼",q:"下列何者為 cuprea bark 基原植物之一?(108-2)",o:["Cinchona succirubra","Cephaelis acuminata","Remijia pedunculata","Cinchona ledgeriana"],a:2,n:["為紅金雞納樹","為吐根基原之一","Cuprea bark 基原為 Remijia 屬","為黃金雞納樹"]},
+{s:"生物鹼",q:"何者不是 cocaine 水解後之產物?(108-2)",o:["ecgonine","cinnamic acid","benzoic acid","methyl alcohol"],a:1,n:["水解產物","Cinnamic acid 不是 cocaine 水解產物(為 cinnamoylcocaine 水解產物)","水解產物","水解產物"]},
+{s:"生物鹼",q:"下列生物鹼何者不屬於 alkaloidal amines?(108-2)",o:["pilocarpine","ephedrine","colchicine","cathinone"],a:0,n:["Pilocarpine 為 imidazole 類,不屬 alkaloidal amine","Ephedrine 屬 alkaloidal amine","Colchicine 屬 alkaloidal amine","Cathinone 屬 alkaloidal amine"]},
+{s:"生物鹼",q:"麥角生物鹼成分中,下列何者屬非水溶性?(108-1)",o:["ergometrine","ergotamine","ergonovine","ergometrinine"],a:1,n:["Ergometrine 為水溶性","Ergotamine 為脂溶性(非水溶性)","Ergonovine 即 ergometrine,水溶性","Ergometrinine 為其異構物"]},
+{s:"生物鹼",q:"生藥 calabar bean 的植物基原為何?(108-1)",o:["Strychnos ignatia","Physostigma venenosum","Pilocarpus microphyllus","Aconitum napellus"],a:1,n:["為聖依納爵豆(St. Ignatius bean)基原","Calabar bean 基原為 Physostigma venenosum","為毛果蕓香","為烏頭"]},
+{s:"生物鹼",q:"下列何者為 isoquinoline 類生物鹼?(108-1)",o:["quinidine","reserpine","morphine","caffeine"],a:2,n:["屬 quinoline 類","屬 indole 類","Morphine 屬 isoquinoline(morphinan)類","屬 purine 類"]},
+{s:"生物鹼",q:"下列有關 tropane alkaloid 之敘述,何者正確?(108-1)",o:["具三環結構之化合物","由吡咯啶(pyrrolidine)與 2 分子乙酸縮合而成","主要分布於唇形科植物","其生合成前驅物(precursor)為烏胺酸(ornithine)"],a:3,n:["錯誤:tropane 為雙環結構","錯誤","錯誤:主要分布於茭科","Tropane 生合成前驅物為 ornithine"]},
+{s:"生物鹼",q:"下列何者為固醇類生物鹼?(108-1)",o:["cinchonidine","caffeine","protoveratrine A","pilocarpine"],a:2,n:["屬 quinoline 類","屬 purine 類","Protoveratrine A 為藜蘆固醇類生物鹼","屬 imidazole 類"]},
+{s:"生物鹼",q:"下列何種生物鹼之氮原子不在環狀結構上?(108-1)",o:["arecoline","yohimbine","colchicine","codeine"],a:2,n:["氮在環上","氮在環上","Colchicine 為 alkaloidal amine,氮在側鏈(乙醐胺基)","氮在環上"]},
+{s:"生物鹼",q:"下列生藥與使用部位之配對,何者錯誤?(107-2)",o:["麻黃-地上部分","麥角-種子","美洲箭毒-樹皮","曼陀羅-葉"],a:1,n:["麻黃用草莖","錯誤:麥角為菌核,非種子","樹皮為箭毒來源","曼陀羅用葉"]},
+{s:"生物鹼",q:"下列麥角生物鹼成分何者屬水溶性?(107-2)",o:["ergotamine","ergometrine","ergotaminine","dihydroergotamine"],a:1,n:["脂溶性","Ergometrine 為水溶性","脂溶性","脂溶性"]},
+{s:"生物鹼",q:"下列關於金雞納皮之敘述,何者正確?(107-2)",o:["取自 Cinchona succirubra 之莖皮或根皮","在其基原植物中 quinine 之含量以栽種 3~5 年者為最高","Cinchona ledgeriana 及 C.calisaya 之雜交種樹皮所含 cinchona alkaloid 之量不如個別原種","原產地為印尼,商業上之主要供應來自於印尼及印度"],a:0,n:["正確:取自莖皮或根皮","錯誤:與前題(6~9 年)不符","錯誤:雜交種含量通常更高","錯誤:原產地為南美洲"]},
+{s:"生物鹼",q:"下列何者為鴉片(opium)的特有成分且被用於鴉片的檢測?(107-2)",o:["aspartic acid","ferric chloride","meconic acid","quinolinic acid"],a:2,n:["為胺基酸","為檢驗試劑","Meconic acid(罌粟酸)為鴉片特有成分,與 FeCl₃ 呈紅色","為 nicotine 生合成中間體"]},
+{s:"生物鹼",q:"下列何種植物稱為「產生蒂巴因的罌粟」(thebaine-producing poppy)?(107-2)",o:["Papaver bracteatum","Papaver somniferum","Papaver somniferum var. nigrum","Papaver rhoeas"],a:0,n:["Papaver bracteatum 主要含 thebaine","一般鴉片罌粟,主含 morphine","為鴉片罌粟變種","為虞美人,不含此成分"]},
+{s:"生物鹼",q:"關於 tubocurarine chloride 之敘述,何者錯誤?(107-2)",o:["為一種 isoquinoline alkaloid","可由 Chondrodendron tomentosum 抽提","是一種骨骼肌鬆弛劑","分子內有 2 個四級 N 原子,可溶於水"],a:3,n:["正確","正確","正確","錯誤:d-tubocurarine 分子內只有 1 個四級 N 原子(另 1 個為三級)"]},
+{s:"生物鹼",q:"由古柯葉製備古柯糊(coca paste)之過程,下列步驟何者錯誤?(107-2)",o:["乾燥之古柯碎葉與水及石灰混合","需加入煤油(kerosene)並攪拌","過程需經酸液處理","最後步驟需將抽提液中和至 pH 7"],a:3,n:["正確","正確","正確","錯誤:此步驟不是中和至 pH 7(依書中解答)"]},
+{s:"生物鹼",q:"下列何種生藥之基原植物為梧桐科並含有 caffeine?(107-2)",o:["kolanuts","coffee bean","guarana","paraguay tea"],a:0,n:["可樂果為梧桐科,含 caffeine","咖啡屬茜草科","瓜拉納屬無患子科","巴拉圭茶屬冬青科"]},
+{s:"生物鹼",q:"檳榔之醫藥用途為何?(107-1)",o:["驅絛蟲","戒菸","止嘔吐","抗暈眩"],a:0,n:["檳榔可驅絛蟲","非檳榔用途","非檳榔用途","非檳榔用途"]},
+{s:"生物鹼",q:"下列生物鹼之結構,何者具有 4 個 N 原子?(107-1)",o:["physostigmine","strychnine","reserpine","vinblastine"],a:3,n:["含 3 個 N","含 2 個 N","含 2 個 N","Vinblastine 為雙吲哚結構,含 4 個 N"]},
+{s:"生物鹼",q:"金雞納樹皮主要含下列何類型成分?(107-1)",o:["quinoline alkaloids","anthraquinone glycosides","flavonoids","carotenoids"],a:0,n:["Quinine 等為 quinoline 類生物鹼","非主成分","非主成分","非主成分"]},
+{s:"生物鹼",q:"下列生藥與使用部位之配對,何者錯誤?(107-1)",o:["corydalis-塊莖","opium-成熟果實","ipecac-根莖及根","sanguinaria-根莖"],a:1,n:["正確","錯誤:鴉片為未成熟果實之乳汁","正確","正確"]},
+{s:"生物鹼",q:"屬於 non-heterocyclic alkaloid 類之生物鹼為:(104-1)",o:["Cocaine","Quinine","Ephedrine","Berberine"],a:2,n:["含 tropane 雜環","含 quinoline 雜環","Ephedrine 為非雜環(alkaloidal amine)","含 isoquinoline 雜環"]},
+{s:"生物鹼",q:"石榴皮鹼(pelletierine)係依據下列何者命名?(104-1)",o:["生理活性","發現者之姓名","屬名","生藥名"],a:1,n:["非依生理活性","Pelletierine 依發現者 Pelletier 之姓命名","非依屬名","非依生藥名"]},
+{s:"生物鹼",q:"若以 ferric chloride 試液檢驗 opium,其將呈現何種顏色?(102-1)",o:["綠色","紅色","橙黃色","藍黑色"],a:1,n:["非此顏色","鴉片中 meconic acid 遇 FeCl₃ 呈紅色","非此顏色","藍黑色為鞣質與鐵鹽之反應"]},
+{s:"生物鹼",q:"下列何種生物鹼其化學性質與另三者有極大的差異?(100-1)",o:["Hydrastine","Tubocurarine","Berberine","Sanguinarine"],a:0,n:["Hydrastine 為三級胺,可用酸萃取(依書中解答)","四級銨類生物鹼","四級銨類生物鹼","四級銨類生物鹼"]},
+{s:"多醣類",q:"下列何者不屬於半纖維素(Hemicelluloses)類?(113-2)",o:["rhamnogalacturonan","xyloglucan","inulin","pectin"],a:2,n:["含半乳糖醛酸與鼠李糖,屬半纖維素類","由木糖與葡萄糖組成,屬半纖維素類","Inulin 由果糖組成(菊糖),不屬半纖維素","Pectin 含半乳糖(Galactose)(依書中解析)"]},
+{s:"多醣類",q:"下列何者不屬於 karaya gum 的用途?(113-1)",o:["製錠時製粒過程(granulation)中的 binder","乳化劑(emulsifying agent)","膨脹性瀉劑(bulk laxative)","牙用黏合劑(dental adhesive)"],a:0,n:["Karaya gum 不用於製粒黏合劑","可作乳化劑","可作膨脹性瀉劑","可作牙用黏合劑"]},
+{s:"多醣類",q:"下列何者係抽提自褐海藻(brown seaweeds, Macrocystis pyrifera)?(112-2)",o:["agar","algin","carrageenan","tragacanth"],a:1,n:["Agar(洋菜)來自紅藻","Algin(藻酸)抽提自褐海藻","Carrageenan(鹿角菜膠)來自紅藻","Tragacanth 為滲出膠(西黃耆膠)"]},
+{s:"多醣類",q:"下列有關瓜爾膠(guar gum)和刺槐豆膠(locust bean gum)之敘述,何者錯誤?(111-2)",o:["二者的製造都是將種子的外胚乳磨碎而得的產物","植物基原皆屬豆科","皆屬增稠劑(thickener)","二者皆含 galactomannan"],a:0,n:["錯誤:二者是將種子的胚乳磨碎而得(依書中解答)","皆屬豆科","皆為增稠劑","皆含半乳甘露聚糖"]},
+{s:"多醣類",q:"下列何者之主成分非 heteroglycans?(111-2)",o:["acacia","agar","carrageenan","potato starch"],a:3,n:["阿拉伯膠為異質聚醣","洋菜為異質聚醣","鹿角菜膠為異質聚醣","馬鈴薯澱粉由葡萄糖組成,屬同質聚醣(homoglycan)"]},
+{s:"多醣類",q:"下列何者不是阿拉伯膠(acacia)的用途?(111-1)",o:["膨脹性瀉劑(bulk laxative)","乳化劑(emulsifying agent)","緩和劑(demulcent)","懸浮劑(suspending agent)"],a:0,n:["阿拉伯膠不作膨脹性瀉劑","可作乳化劑","可作緩和劑","可作懸浮劑"]},
+{s:"多醣類",q:"鹿角菜(carrageenan)和瓊脂(agar)化學構造上之最大差異為何?(110-2)",o:["前者有較高的硫酸酯基","單醣組成,後者以半乳糖為主,前者以葡萄糖為主","單醣間之鍵結,前者以 1,3 鍵結為主,後者以 1,6 鍵結為主","後者具 3,6-anhydro 之架構,前者則否"],a:0,n:["Carrageenan 含較高硫酸酯基(依書中解答)","兩者皆以半乳糖為主","鍵結種類描述不符","兩者皆具 3,6-anhydro 結構"]},
+{s:"多醣類",q:"下列有關植物膠之敘述,何者錯誤?(108-2)",o:["果膠的黏滯度隨乳糖單元數而改變","阿拉伯膠可溶於 50%乙醇水溶液","梧桐膠為滲出樹膠(exudate gums)中溶解度最低者之一","西黃耆膠為滲出樹膠(exudate gums)中最耐酸者"],a:0,n:["錯誤:果膠黏滯度不會隨乳糖單元數改變(隨半乳糖醛酸含量增加)","正確","正確","正確"]},
+{s:"多醣類",q:"下列何種多醣具有抗酸水解之特性,並可作為懸浮劑、乳化劑及黏著劑?(108-1)",o:["tragacanth","acacia","karaya gum","sodium alginate"],a:0,n:["西黃耆膠為滲出樹膠中最耐酸者","耐酸性較差","耐酸性不及西黃耆膠","酸性下會沉澱"]},
+{s:"多醣類",q:"主成分為 sodium alginate 的生藥基原植物為何?(107-2)",o:["Claviceps purpurea","Chondrus crispus","Gracilaria confervoides","Macrocystis pyrifera"],a:3,n:["為麥角菌","為紅藻(鹿角菜膠來源)","為紅藻(洋菜來源)","Macrocystis pyrifera 為褐藻,為藻酸鈉來源"]},
+{s:"多醣類",q:"下列何者為植物皮部受創後所分泌出的膠體(exudate gums)?(107-1)",o:["acacia","amylopectin","guaran","pectin"],a:0,n:["阿拉伯膠為滲出膠","為澱粉成分","為種子膠","為果膠類"]},
+{s:"多醣類",q:"Inulin 屬於何者?(113-1)",o:["arabin","fructan","galactan","glucan"],a:1,n:["Arabin 由阿拉伯糖組成","Inulin 由果糖組成,屬 fructan","Galactan 由半乳糖組成","Glucan 由葡萄糖組成"]},
+{s:"多醣類",q:"下列何種植物不富含菊糖(inulin)?(112-1)",o:["kohlrabi(大頭菜)","lappa(牛蔷)","chicory(菊苣)","echinacea(紫锥菊)"],a:0,n:["大頭菜不富含菊糖(依書中解答)","牛蔷富含菊糖","菊苣富含菊糖","紫锥菊富含菊糖"]},
+{s:"多醣類",q:"菊糖(inulin)屬於何種多醣類?(110-1)",o:["fructan","glucan","xylan","galactan"],a:0,n:["菊糖水解得果糖,屬 fructan","由葡萄糖組成","由木糖組成","由半乳糖組成"]},
+{s:"多醣類",q:"下列有關 hetastarch 的敘述,何者錯誤?(109-1)",o:["最初是自乳酸桿菌 Leuconostoc mesenteroides 分離得到","含有 90 %的 amylopectin","每 10 個 glucose 單體上約具 7~8 個 hydroxyethyl 的取代基","其 6 %的製劑可用為血漿擴充劑(plasma expander)"],a:0,n:["錯誤:Leuconostoc mesenteroides 是 dextran 的來源","正確","正確","正確"]},
+{s:"多醣類",q:"下列何種酶素存在於唇液和膿液中,可將 amylose 水解成葡萄糖、麥芽糖和支鏈澱粉等產物?(108-2)",o:["α-1,4-glucan maltohydrolase","α-1,4-glucan 4-glucanohydrolase","β-1,4-glucan maltohydrolase","β-1,4-glucan 4-glucanohydrolase"],a:1,n:["為 β-amylase(植物來源)","α-amylase 存在於唇液與膿液","非澱粉酶","非澱粉酶"]},
+{s:"多醣類",q:"Amylose 的合成是藉由下列何種酶素?(107-2)",o:["Q-enzyme","transglycosylases","α-amylase","β-amylase"],a:1,n:["Q-enzyme 與支鏈(amylopectin)的分支形成有關","依書中解答為 transglycosylases","為水解酶,非合成","為水解酶,非合成"]},
+{s:"多醣類",q:"下列關於 dextran 的敘述,何者正確?(107-2)",o:["為 α-1,4-linked glucan","為 α-1,6-linked glucan","為 β-2,1-linked fructan","為 β-2,6-linked fructan"],a:1,n:["這是澱粉的主要鍵結","Dextran 以 α-1,6 鍵結為主","這是 inulin 的鍵結","非 dextran 的鍵結"]},
+{s:"多醣類",q:"Hetastarch 主要結構之鍵結(linkage)為?(107-1)",o:["α-1,4 D-glucosidic","β-1,4 D-glucosidic","α-1,6 D-glucosidic","β-1,6 D-glucosidic"],a:0,n:["Hetastarch 主要為 α-1,4 鍵結(澱粉衍生物)","為纖維素鍵結","為 dextran 的主鍵結","非此鍵結"]},
+{s:"多醣類",q:"有關 starch 之敘述,下列何者錯誤?(106-1 藥劑)",o:["適合利用熱水溶解","具有 dilatancy 特性","常做為稀釋劑","具較多α-1, 4-glucosidic 鍵結"],a:0,n:["錯誤(依書中解答;講義僅列直鏈澱粉易溶於溫水)","正確","正確","正確"]},
+{s:"多醣類",q:"下列哪些可作為代用血漿?①dextran ②hetastarch ③inulin ④algin(99-1)",o:["①④","①②","②③","③④"],a:1,n:["④ algin 不用於代用血漿","Dextran 與 hetastarch 可作血漿擴充劑","③ inulin 不用於代用血漿","inulin 與 algin 皆不是血漿代用品"]},
+{s:"多醣類",q:"下列那一個膠類不用作膨脹性瀉劑?(105-2)",o:["阿拉伯膠(acacia)","梧桐膠(karaya gum)","鹿角菜(carrageenan)","古耳膠(guar gum)"],a:0,n:["阿拉伯膠用於乳化、緩和、懸浮,不作膨脹性瀉劑","梧桐膠可作膨脹性瀉劑","鹿角菜可作膨脹性瀉劑","瓜爾膠可作緩瀉劑、增稠劑"]},
+{s:"苯丙烷類",q:"下列何種基原植物含有抗凝血成分 dicumarol?(113-2)",o:["Dipteryx odorata","Ammi visnaga","Apium graveolens","Melilotus officinalis"],a:3,n:["Dipteryx odorata 含 coumarin","Ammi visnaga 含 khellin","Apium graveolens(芹菜)含 furocoumarin","Melilotus officinalis(黃花草木樨)發酵後可生成 dicumarol"]},
+{s:"苯丙烷類",q:"補骨脂所含之 psoralen 屬於下列何類成分?(112-2)",o:["monoterpenoid phenol","flavonoid","furocoumarin","chalcone"],a:2,n:["非此類","非此類","Psoralen 為 furocoumarin(呋喃香豆素)","非此類"]},
+{s:"苯丙烷類",q:"下列何者生藥成分對類風濕性關節炎之疼痛具緩解作用,且屬於 abridged phenylpropanoid?(112-2)",o:["capsaicin","rutin","methoxsalen","silybin"],a:0,n:["Capsaicin(辣椒素)屬 abridged phenylpropanoid,可緩解疼痛","Rutin 為類黃酮苷","Methoxsalen 為 furocoumarin","Silybin 為類黃酮木酚素"]},
+{s:"苯丙烷類",q:"下列何類型成分具 benzo-γ-pyrone 之骨架?(112-1)",o:["coumarin","chromone","anthraquinone","isoquinoline"],a:1,n:["Coumarin 為 benzo-α-pyrone","Chromone(如 khellin)具 benzo-γ-pyrone 骨架","非此骨架","非此骨架"]},
+{s:"苯丙烷類",q:"Dicumarol 係來自何種生藥且藉由干擾下列何者之作用,而達到抗凝血效果?(112-1)",o:["Dipteryx odorata;vitamin A","Apium graveolens;vitamin B","Melilotus officinalis;vitamin K","Echinacea pallida;vitamin P"],a:2,n:["來源與維生素皆不符","來源與維生素皆不符","Dicumarol 來自 Melilotus officinalis,拮抗維生素 K","來源與維生素皆不符"]},
+{s:"苯丙烷類",q:"下列有關 psoralens 之敘述,何者錯誤?(111-1)",o:["化學結構屬於 furocoumarin 類","有光敏感性(photosensitizing)","可用於治療白內障","Apiaceae 及 Rutaceae 植物中含有此類成分"],a:2,n:["正確","正確","錯誤:psoralens 用於白斑、乾癬等光化學治療,非白內障","正確"]},
+{s:"苯丙烷類",q:"下列有關生藥成分 khellin 的敘述,何者錯誤?(110-2)",o:["結構屬於 furochromone type","具有抗尿道痙攣(urethral spasm)與腎絞痛(renal colic)作用","具有擴張冠狀動脈及氣管作用","主要由 Ammi visnaga 的根部得到"],a:3,n:["正確","正確","正確","錯誤:Khellin 來自 Ammi visnaga 的果實,非根部"]},
+{s:"苯丙烷類",q:"下列生藥成分與其作用之配對,何者正確?(110-1)",o:["quinine-antineoplastic","physostigmine-anticholinergic","khellin-antiasthmatic","cocaine-narcotic analgesic"],a:2,n:["Quinine 為抗瘧疾","Physostigmine 為膽鹼酯酶抑制劑","Khellin 為抗氣喘藥","Cocaine 為局部麻醉劑"]},
+{s:"苯丙烷類",q:"中藥補骨脂(Psoraleae Fructus)所含 psoralen 結構(如下圖),具有下列何種骨架?(110-1)",o:["furocoumarin","chalcone","flavonoid","monoterpenoid phenol"],a:0,n:["Psoralen 為 furocoumarin","非此骨架","非此骨架","非此骨架"]},
+{s:"苯丙烷類",q:"紫錐菊活性成分為 chicoric acid,其化學結構具有幾個 phenylpropanoid 單元?(109-2)",o:["1","2","3","4"],a:1,n:["錯誤","Chicoric acid 為 bis-hydroxycinnamic acid,含 2 個 phenylpropanoid 單元","錯誤","錯誤"]},
+{s:"苯丙烷類",q:"辣椒的辛辣成分 capsaicin,在果實那一部位之含量最高?(109-2)",o:["種子","種皮","隔膜","果蒂"],a:2,n:["非含量最高部位","非含量最高部位","依書中解答,隔膜含量最高","非含量最高部位"]},
+{s:"苯丙烷類",q:"下列有關辣椒之敘述,何者錯誤?(108-2)",o:["基原之科別為 Solanaceae","capsaicin 含有 vanillyl ester 構造","含維生素 C","capsaicin 可用來緩解疼痛"],a:1,n:["正確","錯誤:capsaicin 為 vanillyl amide(醯胺),不是酯","正確","正確"]},
+{s:"苯丙烷類",q:"下列敘述何者正確?(107-2)",o:["coumarins 僅存在於豆科植物","furocoumarins 僅存在於繖形科植物","興安升麻含 furocoumarins","dicoumarol 可由合成而得"],a:3,n:["錯誤:coumarins 分布廣泛","錯誤:亦存在於芸香科","錯誤","Dicoumarol 可由合成而得"]},
+{s:"苯丙烷類",q:"下列關於 echinacea 之敘述,何者錯誤?(106-1)",o:["在美國曾充當淨血劑(blood purifier)","有效成分為 khellin","具有免疫提升作用","基原植物屬菊科"],a:1,n:["正確","錯誤:紫錐菊成分為 chicoric acid、多醣類,khellin 來自 Ammi visnaga","正確","正確(Asteraceae)"]},
+{s:"木酚素",q:"生藥 American mandrake 主含下列何種成分?(113-2)",o:["silybin","podophyllotoxin","chicoric acid","gallic acid"],a:1,n:["Silybin 為水飛薊成分","American mandrake(Podophyllum peltatum)主要活性成分為 podophyllotoxin","Chicoric acid 為紫錐菊成分","Gallic acid 為鞣質水解產物"]},
+{s:"木酚素",q:"下列生藥活性成分及其所屬化學結構分類之配對,何者錯誤?(113-1)",o:["khellin-furochromone","dicumarol-bishydroxycoumarin","methoxsalen-flavonolignan","podophyllotoxin-lignan"],a:2,n:["正確","正確","錯誤:methoxsalen 為 furocoumarin,不是 flavonolignan","正確"]},
+{s:"木酚素",q:"有關 etoposide 之化學結構敘述,下列何者錯誤?(113-1)",o:["具有反式內酯環","含有酚基","由二個 C6-C3 單元組成","含有鼠李糖基"],a:3,n:["正確","正確","正確","錯誤:醣基為 ethylidene glucose,不是鼠李糖基"]},
+{s:"木酚素",q:"下列有關 lignans 之敘述,何者正確?(112-2)",o:["etoposide 屬於 neolignan","可由二分子 coniferyl alcohol 聚合而得","podophyllotoxin 之內酯(lactone)屬於 cis 型","etoposide 之 C(4')-OH 基對抗癌活性不重要"],a:1,n:["錯誤:etoposide 屬 lignan 類生藥","Coniferyl alcohol 經氧化二聚作用可產生 lignan","錯誤:podophyllotoxin 內酯環為 trans form(依書中)","錯誤:C4'以 OH 取代甲氧基可增加抗癌活性"]},
+{s:"木酚素",q:"Lignans 與 neolignans 為下列那一類化合物的雙聚體?(111-2)",o:["coumarin","gallic acid","mevalonic acid","phenylpropanoid"],a:3,n:["非其單體","非其單體","非其單體","Lignan 與 neolignan 為 phenylpropanoid 的雙聚體"]},
+{s:"木酚素",q:"Etoposide 為何種生藥成分之衍生物且用於治療何種疾病?(111-1)",o:["podophyllotoxin;癌症","guaiacol;感冒","coumarin;血栓","methoxsalen;白斑症"],a:0,n:["Etoposide 為 podophyllotoxin 半合成衍生物,用於治療睪丸癌、小細胞肺癌","非衍生物","非衍生物","非衍生物"]},
+{s:"木酚素",q:"有關 podophyllum 的敘述,下列何者錯誤?(109-2)",o:["其植物科別為 Berberidaceae","活性成分 podophyllotoxin 屬於 lignan 類","podophyllotoxin 在弱鹼性條件下,其內酯環(lactone ring)會產生 epimerization,形成 trans isomer","基原植物為 Podophyllum peltatum"],a:2,n:["正確(小蘗科)","正確","錯誤:epimerization 後形成較穩定的 cis form,但會失去活性","正確"]},
+{s:"木酚素",q:"下列何者為普達非倫(podophyllum)之別名?(108-1)",o:["bitterapple","mayapple","pineapple","thornapple"],a:1,n:["非別名","Podophyllum 別名 Mayapple","非別名","Thornapple 為曼陀羅"]},
+{s:"木酚素",q:"屬於 bisphenylpropanoid 衍生之化合物為:(108-1)",o:["coumarins","flavonoids","lignans","tannins"],a:2,n:["為苯丙烷單體衍生","為 C6-C3-C6 結構","Lignans 為兩個 phenylpropanoid 雙聚體","為多酚類"]},
+{s:"木酚素",q:"關於 lignan 生合成途徑之順序,下列何者正確?(107-1)",o:["shikimic acid→p-coumaric acid→caffeic acid→ferulic acid→lignan","shikimic acid→caffeic acid→p-coumaric acid→ferulic acid→lignan","shikimic acid→p-coumaric acid→ferulic acid→caffeic acid→lignan","shikimic acid→ferulic acid→p-coumaric acid→caffeic acid→lignan"],a:0,n:["順序為 Shikimic acid→P-coumaric acid→Caffeic acid→Ferulic acid→Lignan","順序錯誤","順序錯誤","順序錯誤"]},
+{s:"木酚素",q:"下列關於 podophyllotoxin 之敘述,何者正確?(107-1)",o:["其含量,Podophyllum emodi 較 P. peltatum 高","結構中不含內酯環","結構中含有氮原子","其副作用為便秘"],a:0,n:["依講義:P. emodi 之含量較 P. peltatum 高","錯誤:含有內酯環","錯誤:不含氮原子","錯誤:講義列其功用為抗有絲分裂、瀉下作用,而非便秘"]},
+{s:"木酚素",q:"有關木酚素(lignans)之敘述,下列何者錯誤?(107-1)",o:["主架構含 18 個碳原子","podophyllotoxin 是一種 lignan","僅存於木本植物","係由兩個 phenylpropene 衍生物於 C3 side chain 之 β-carbon 聚合而得"],a:2,n:["正確:由兩個 C6-C3 單元組成,共 18 個碳","正確","錯誤:並非僅存於木本植物","正確"]},
+{s:"木酚素",q:"Lignan 是由幾個 phenylpropanoid 結合而成?(105-1)",o:["2","3","4","5"],a:0,n:["Lignan 為兩個 phenylpropanoid 的雙聚體","錯誤","錯誤","錯誤"]},
+{s:"木酚素",q:"下列何者是從植物分離而得具抗癌活性,且屬於木脂素(lignans)類成分?(100-1)",o:["Taxol","Vincristine","Podophyllotoxin","Adriamycin"],a:2,n:["Taxol 屬二萜類","Vincristine 屬生物鹼","Podophyllotoxin 屬 lignan 類,具抗癌活性","Adriamycin 為微生物來源"]},
+{s:"木酚素",q:"Etoposide 係由 Podophyllotoxin 修飾衍生而成,其 C-ring 的 C-1 位置有何種取代基?(99-2)",o:["-OH","-H","Glucose","Ethylidene glucose"],a:3,n:["錯誤","錯誤","錯誤","C1 接 Ethylidene glucose(不是鼠李糖基)"]},
+{s:"木酚素",q:"由 podophyllotoxin 之構造經修飾可得臨床之抗癌藥物為:(97-2)",o:["paclitaxel","topotecan","vinorelbine","etoposide"],a:3,n:["Paclitaxel 來自紫杉","Topotecan 來自喜樹鹼","Vinorelbine 來自長春花生物鹼","Etoposide 為 podophyllotoxin 半合成衍生物"]},
+{s:"類黃酮",q:"關於 milk thistle 的敘述,下列何者錯誤?(113-2)",o:["其主要單一化合物為 silymarin","主要成分結構屬於 flavonolignans","silybin 主要功效為保護肝臟","其成分具有活化 DNA-dependent RNA polymerase I 的作用"],a:0,n:["錯誤:silymarin 是混合物,主成分為 silybin","正確","正確","正確"]},
+{s:"類黃酮",q:"有關 milk thistle 之敘述,下列何者錯誤?(113-1)",o:["其植物科別為 Asteraceae","所含 silybin 具保肝作用","基原植物為 Silybum marianum","silymarin 屬於 bislignan 類"],a:3,n:["正確(菊科)","正確","正確","錯誤:silymarin 屬 flavonolignan,不是 bislignan"]},
+{s:"類黃酮",q:"下列生藥基原植物及其活性成分之配對,何者錯誤?(112-2)",o:["Melilotus officinalis-dicumarol","Silybum marianum-silybin","Podophyllum peltatum-etoposide","Echinacea angustifolia-chicoric acid"],a:2,n:["正確","正確","錯誤:Podophyllum peltatum 含 podophyllotoxin,etoposide 為其半合成衍生物","正確"]},
+{s:"類黃酮",q:"下列有關 rutin 的敘述,何者錯誤?(111-2)",o:["屬於 flavonoid 類化合物","又稱 vitamin K","可強化微血管之通透性(permeability)","豆科 Sophora 屬植物含量豐富"],a:1,n:["正確","錯誤:rutin 又稱 vitamin P,不是 vitamin K","正確","正確"]},
+{s:"類黃酮",q:"下列化合物,何者之完全水解產物不含鼠李糖(rhamnose)?(110-2)",o:["rutin","naringin","hesperidin","hyperoside"],a:3,n:["Rutin 含 rutinose(glucose+rhamnose)","Naringin 含 rutinoside","Hesperidin 含 rutinoside","Hyperoside 的糖為半乳糖,不含鼠李糖"]},
+{s:"類黃酮",q:"中藥陳皮之成分 hesperidin 又稱為:(110-2)",o:["vitamin A","vitamin D","vitamin E","vitamin P"],a:3,n:["錯誤","錯誤","錯誤","Hesperidin 又稱 Vit. P(滲透因子)"]},
+{s:"類黃酮",q:"下列有關苯基丙烷(phenylpropanoid)之敘述,何者錯誤?(110-1)",o:["phenylalanine 和 tyrosine 是其主要前驅物(precursor)","生合成路經為 shikimic acid pathway","黃酮類(flavonoid)屬於 bisphenylpropanoid","木脂素(lignan)屬於此成分分類"],a:2,n:["正確","正確","錯誤:flavonoid 骨架為 C6-C3-C6,不是 bisphenylpropanoid","正確"]},
+{s:"類黃酮",q:"Silybin 之化學結構分類屬於下列何者?(109-1)",o:["bisflavonoid","meroterpenoid","flavonolignan","neolignan"],a:2,n:["非此類","非此類","Silybin 屬 flavonolignan","非此類"]},
+{s:"類黃酮",q:"下列有關 rutin 的敘述,何者錯誤?(108-2)",o:["是一種 galactoglucoside","其非醣體為 quercetin","為 vitamin P 之一員","富含於 Sophora 屬植物"],a:0,n:["錯誤:rutin 的醣基為 rutinose(glucose+rhamnose),不是 galactose","正確","正確","正確"]},
+{s:"類黃酮",q:"下列有關芸香苷(rutin)之敘述,何者錯誤?(108-1)",o:["水解後產物之一為 quercetin","水解後產物之一為 rhamnose","有 vitamin P 之稱","水解後產物之一為 galactose"],a:3,n:["正確","正確","正確","錯誤:水解產物為 quercetin、glucose、rhamnose,不含 galactose"]},
+{s:"鞣質",q:"下列生藥與其基原植物之科別配對,何者錯誤?(112-2)",o:["nutgall-Fagaceae","milk thistle-Asteraceae","capsicum-Solanaceae","echinacea-Lamiaceae"],a:3,n:["沒食子(nutgall)來自殼斗科 Quercus 屬","水飛薊屬菊科","辣椒屬茄科","錯誤:紫錐菊(Echinacea)屬菊科 Asteraceae,不是唇形科"]},
+{s:"鞣質",q:"下列何種生藥主要含有水解型鞣質(Hydrolyzable tannin)?(112-1)",o:["Japanese gall","tea leaf","grape seed","areca nut"],a:0,n:["Japanese gall(五倍子)主含水解型鞣質(gallotannin)","茶葉主含縮合型單寧(兒茶素類)","葡萄籽主含縮合型單寧(proanthocyanidin)","檳榔含縮合型單寧"]},
+{s:"鞣質",q:"下列有關 proanthocyanidin 之敘述,何者錯誤?(111-1)",o:["為 condensed tannin","加熱處理後單體間之 C-C 鍵結易斷裂","其單體大部分為 flavan-3-ol","具抗氧化作用"],a:1,n:["正確","錯誤(依書中解答)","正確","正確"]},
+{s:"鞣質",q:"下列何者屬於 hydrolyzable tannin?(110-1)",o:["proanthocyanidin","hamamelitannin","leucocyanidin","pycnogenol"],a:1,n:["屬縮合型單寧","Hamamelitannin(金縷梅)為水解型單寧","為 leucoanthocyanidin,屬縮合型單寧","屬縮合型單寧(松樹皮萃取物)"]},
+{s:"鞣質",q:"五倍子(Chinese gall)所含之 tannin 主要為下列何種組成物之混合物?(109-1)",o:["catechin","proanthocyanidin","leucocyanidin","galloyl glucose"],a:3,n:["為縮合型單寧單體","為縮合型單寧","為縮合型單寧前驅","五倍子單寧為 galloyl glucose 的混合物"]},
+{s:"鞣質",q:"下列單寧(tannin)之相關敘述,何者錯誤?(108-1)",o:["leucoanthocyanidins 具抗氧化作用","沒食子藥源自 Quercus infectoria 之蟲癭","五倍子為含有縮合型單寧類的收斂劑","水解型單寧經水解後可產生 gallic acid 或 hexahydroxydiphenic acid"],a:2,n:["正確","正確","錯誤:五倍子含水解型單寧,不是縮合型","正確"]},
+{s:"鞣質",q:"Hydrolyzable tannin 與下列何者無關?(106-2)",o:["gallic acid","catechin","hexahydroxydiphenic acid","glucose"],a:1,n:["水解型單寧水解產物之一","Catechin 為縮合型單寧單體,與水解型無關","水解型單寧水解產物之一","水解型單寧的核心糖"]},
+{s:"萜類",q:"下列有關 10-de(s)acetylbaccatin III 的敘述,何者正確?(113-2)",o:["主要來自 Taxus baccata 葉部","抗腫瘤效果優於 taxol","不具有 taxane 架構","比 taxol 結構上少 2 個乙醯(acetyl)基"],a:0,n:["10-Deacetylbaccatin III 主要來自歐洲紫杉(Taxus baccata)葉部,為 taxol 半合成原料","錯誤:本身不是優於 taxol 的抗腫瘤藥,是半合成前驅物","錯誤:具有 taxane 架構","錯誤:僅比 taxol 少一個乙醯基(C-10 位)"]},
+{s:"萜類",q:"下列何者可作為 insect antifeedant?(113-2)",o:["glycyrrhetic acid","diosgenin","β-sitosterol","azadirachtin"],a:3,n:["為甘草的三萜類成分","為薯蕷皂苷元","為植物固醇","Azadirachtin(印楝素)具拒食昆蟲作用"]},
+{s:"萜類",q:"下列關於樟腦(Camphor)之敘述,何者錯誤?(113-1)",o:["為醇類化合物","天然產者為右旋性","pinene 可為合成 camphor 之原料","為局部止癢劑"],a:0,n:["錯誤:camphor 為雙環單萜酮類,不是醇類","正確","正確","正確"]},
+{s:"萜類",q:"印度楝(Azadirachta indica)所含 azadirachtin 之主要用途為何?(113-1)",o:["photo-protection","anti-hypertension","insect anti-feeding","anti-hyperglycemic"],a:2,n:["非其用途","非其用途","Azadirachtin 為昆蟲拒食劑","非其主要用途"]},
+{s:"萜類",q:"下列生藥活性成分之化學結構,何者不含內酯基(Lactone)?(112-2)",o:["ginkgolide A","forskolin","artemisinin","parthenolide"],a:1,n:["含 lactone","Forskolin 為 labdane 型雙萜,不含內酯基","含 lactone(倍半萜內酯)","含 lactone(倍半萜內酯)"]},
+{s:"萜類",q:"麝香酚(Thymol)非下列何種基原植物之主要藥效成分?(112-1)",o:["Thymus vulgaris","Monarda punctata","Carum copticum","Mentha arvensis"],a:3,n:["百里香含 thymol","Monarda punctata 含 thymol","Carum copticum 含 thymol","Mentha arvensis(薄荷)主成分為 menthol,不含 thymol 為主成分"]},
+{s:"萜類",q:"下列何種生藥成分之結構具有 internal peroxide linkage?(112-1)",o:["forskolin","artemisinin","santonin","parthenolide"],a:1,n:["不具過氧橋","Artemisinin 具有 endoperoxide(過氧橋)","不具過氧橋","不具過氧橋"]},
+{s:"萜類",q:"下列關於銀杏之敘述,何者錯誤?(112-1)",o:["丙酮 / 水萃取物之主要成分為 flavonoids 與 terpenoids","ginkgolides 為含 lactone 的 sesquiterpenoids","ginkgolides 可抑制血小板活化因子","基原植物為 Ginkgo biloba"],a:1,n:["正確","錯誤:ginkgolides 為含 lactone 的雙萜類(diterpenoids)","正確(anti-PAF)","正確"]},
+{s:"萜類",q:"Coleus forskohlii 含 forskolin,其植物科別為何?(111-2)",o:["Apiaceae","Lamiaceae","Asteraceae","Valerianaceae"],a:1,n:["非其科別","Coleus forskohlii 屬唇形科(Lamiaceae)","非其科別","非其科別"]},
+{s:"萜類",q:"下列生藥與主成分分類之配對,何者錯誤?(111-1)",o:["Claviceps purpurea-ergot alkaloid","Eucalyptus globulus-sesquiterpene","Strophanthus sarmentosus-cardiac glycoside","Papaver somniferum-benzylisoquinoline alkaloid"],a:1,n:["正確","錯誤:桉葉主成分 cineole 屬單萜類(monoterpene)","正確","正確"]},
+{s:"萜類",q:"桉葉(Eucalyptus globulus)之揮發油主成分為:(111-1)",o:["cineole","pinene","borneol","citronellal"],a:0,n:["桉葉揮發油主成分為 cineole","非主成分","非主成分","非主成分"]},
+{s:"萜類",q:"下列生藥成分,何者具有兩個五員環結構?(110-2)",o:["d-camphor","d-α-pinene","l-thujone","l-menthol"],a:0,n:["Camphor 為雙環結構,具兩個五員環","Pinene 含四員環與六員環","Thujone 含五員環與三員環","Menthol 為單環六員環"]},
+{s:"萜類",q:"下列關於生藥成分 forskolin 之敘述,何者錯誤?(110-2)",o:["屬於 sesquiterpenoid 類成分","基原植物為 Coleus forskohlii","得自基原植物之根部","具治療青光眼及高血壓之潛力"],a:0,n:["錯誤:forskolin 屬 labdane 型雙萜(diterpenoid)","正確","正確","正確"]},
+{s:"萜類",q:"青蒿素可治療瘧疾,是從那一屬植物中提煉出來的?(110-1)",o:["Artemisia","Pyrethrum","Valeriana","Magnolia"],a:0,n:["青蒿素來自黃花蒿(Artemisia annua)","為除蟲菊","為纈草","為木蘭"]},
+{s:"萜類",q:"下列有關 ginkgolide A 之敘述,何者錯誤?(110-1)",o:["具內酯(lactone)結構","分離自銀杏葉","具有 anti-PAF 作用","化學性質不穩定"],a:3,n:["正確","正確","正確","錯誤(依書中解答)"]},
+{s:"萜類",q:"β-Carotene 為生合成 vitamin A 之重要中間物,如過度使用易造成何種副作用?(109-2)",o:["貧血","高血壓","皮膚色素沉積","高血脂"],a:2,n:["非其副作用","非其副作用","過量易造成皮膚色素沉積(胡蘿蔔素血症)","非其副作用"]},
+{s:"萜類",q:"Parthenolide 屬於下列何種倍半萜內酯類之骨架類型?(109-1)",o:["germacranolide","guaianolide","eudesmanolide","xanthanolide"],a:0,n:["Parthenolide 屬 germacranolide 型","非此型","非此型","非此型"]},
+{s:"萜類",q:"有關 artemisinin 之敘述,下列何者正確?(108-2)",o:["是 labdane 型雙萜","Artemisia 與 Chamaemelum 均屬菊科","其生合成前驅物是 geranyl pyrophosphate","主含於其基原植物之根部"],a:1,n:["錯誤:artemisinin 為倍半萜內酯","Artemisia 與 Chamaemelum 均屬菊科","錯誤:倍半萜前驅物為 farnesyl pyrophosphate","錯誤:主含於地上部(葉)"]},
+{s:"萜類",q:"下列有關 taxol 之敘述,何者正確?(108-2)",o:["屬於 sesquiterpene","水溶性佳","主要由 Taxus brevifolia 枝葉取得","10-desacetylbaccatin III 為其半合成原料"],a:3,n:["錯誤:taxol 屬雙萜類","錯誤:水溶性差","錯誤(紫杉醇傳統上主要自樹皮取得)","正確"]},
+{s:"萜類",q:"Triterpenoid 是由幾個 isoprene 單位所構成?(108-1)",o:["2","4","6","8"],a:2,n:["2 個為單萜","4 個為雙萜","6 個 isoprene(C30)為三萜","8 個為四萜"]},
+{s:"萜類",q:"下列有關萜類生藥之敘述,何者錯誤?(108-1)",o:["洋甘菊 Matricaria recutita 之使用部位為花","Tanacetum parthenium 之使用部位為葉子","feverfew 具解熱作用","parthenolide 為雙萜類化合物"],a:3,n:["正確","正確","正確","錯誤:parthenolide 為倍半萜內酯"]},
+{s:"萜類",q:"下列何者不屬於倍半萜結構?(107-2)",o:["matricin","valepotriates","valerenic acid","eudesmol"],a:1,n:["Matricin 為倍半萜內酯","Valepotriates 為 iridoid(單萜類衍生)","Valerenic acid 為倍半萜","Eudesmol 為倍半萜"]},
+{s:"萜類",q:"Cineole 主含於下列何者?(107-1)",o:["anise","caraway","lavender oil","eucalyptus oil"],a:3,n:["茴香主成分為 anethole","葛縷子主成分為 carvone","薰衣草油主成分為 linalool 等","桉葉油(eucalyptus oil)主成分為 cineole"]},
+{s:"萜類",q:"下列有關 feverfew 敘述,何者錯誤?(107-1)",o:["用於解熱","使用部位為葉部","蘭荷科植物","含 guaianolide type sesquiterpene"],a:3,n:["正確","正確","此選項非本題答案(feverfew 實為菊科)","錯誤:feverfew 主成分 parthenolide 為 germacranolide 型,不是 guaianolide 型"]},
+{s:"萜類",q:"下列何成分具有 peroxide 鍵結?(106-2)",o:["parthenolide","loganin","artemisinin","terpin hydrate"],a:2,n:["不具過氧橋","為 iridoid 苷","Artemisinin 具過氧橋","為單萜二醇水合物"]},
+{s:"萜類",q:"下列何成分可能用於青光眼與高血壓之治療?(106-2)",o:["bilobalide","ginkgolides","ginkgotoxin","forskolin"],a:3,n:["銀杏內酯類成分,非主要治療青光眼","主要為抗 PAF 作用","為銀杏毒性成分","Forskolin 具降眼壓、降血壓潛力"]},
+{s:"萜類",q:"下列生藥與成分之配對,何者錯誤?(106-1)",o:["Cinnamomum camphora-camphor","Chamaemelum nobile-(-)-α-bisabolol","Mentha piperita-forskolin","Tanacetum parthenium-parthenolide"],a:2,n:["正確","正確","錯誤:forskolin 來自 Coleus forskohlii,薄荷主成分為 menthol","正確"]},
+{s:"萜類",q:"下列有關 taxol 之敘述,何者錯誤?(105-2)",o:["10-desacetylbaccatin III 為其半合成原料","屬雙萜類結構","第 13 號碳上的酯類支鏈為抗癌活性之必要基團","可抑制微管蛋白(tubulin)的聚合"],a:3,n:["正確","正確","正確","錯誤:taxol 是促進微管蛋白聚合並穩定微管,而非抑制聚合"]},
+{s:"萜類",q:"下列有關 Valeriana officinalis 之敘述,何者錯誤?(105-1)",o:["valerenic acid 為雙萜類","valerenolic acid 為其成分之一","藥用部位為根莖與根","valepotriates 可幫助睡眠"],a:0,n:["錯誤:valerenic acid 屬倍半萜類","正確","正確","正確"]},
+{s:"萜類",q:"下列何成分可用於合成樟腦(camphor)?(105-1)",o:["cineole","pinene","thujone","fenchone"],a:1,n:["非合成原料","Pinene 可作為合成 camphor 之原料","非合成原料","非合成原料"]},
+{s:"萜類",q:"有關薄荷腦(menthol)的敘述,下列何者正確?(103-2)",o:["天然的薄荷腦多為右旋","其結構為雙環且含羥基之單萜","消旋薄荷腦可由麝香草腦氫化合成而得","大劑量的薄荷腦會刺激心臟作用"],a:2,n:["錯誤:天然薄荷腦為左旋(l-menthol)","錯誤:menthol 為單環單萜","Thymol 氫化可合成消旋薄荷腦","錯誤"]},
+{s:"萜類",q:"具有抗瘧疾活性之青蒿素(artemisinin)為下列何類成分?(103-2)",o:["Monoterpene","Sesquiterpene","Diterpene","Triterpene"],a:1,n:["錯誤","Artemisinin 為倍半萜內酯","錯誤","錯誤"]},
+{s:"萜類",q:"下列有關 parthenolide 的敘述,何者正確?(103-2)",o:["其為 Valeriana officinalis L. 的主要成分","可刺激血小板釋放 serotonin","屬於 germacranolide 型之倍半萜類","富含在 feverfew 的花中,每日咀嚼其花可抗癌"],a:2,n:["錯誤:為 feverfew 的主要成分","錯誤:parthenolide 抑制血小板釋放 serotonin","Parthenolide 屬 germacranolide 型倍半萜內酯","錯誤:每日咀嚼其花係用於預防偏頭痛"]},
+{s:"萜類",q:"下列何種生藥適用於解痙攣及抗發炎?(103-1)",o:["Valerian","Feverfew","Chamomile","Forskolin"],a:2,n:["Valerian 用於鎮靜助眠","Feverfew 用於解熱、偏頭痛","Chamomile(洋甘菊)用於解痙攣及抗發炎","Forskolin 用於心血管、青光眼"]},
+{s:"萜類",q:"下列何種植物具抗焦慮及幫助睡眠之作用?(102-2)",o:["Tanacetum parthenium","Matricaria recutita","Valeriana officinalis","Coleus forskohlii"],a:2,n:["為 feverfew,用於解熱、偏頭痛","為洋甘菊,用於解痙攣","Valeriana officinalis(纈草)具鎮靜、抗焦慮、助眠作用","為 forskolin 來源"]},
+{s:"萜類",q:"Borneol 經何種反應生成 camphor?(102-1)",o:["氧化","還原","水解","分解"],a:0,n:["Borneol(醇)氧化成 camphor(酮)","錯誤","錯誤","錯誤"]},
+{s:"萜類",q:"下列有關 cineole 之敘述,何者錯誤?(100-2)",o:["為醇類化合物","為 eucalyptus oil 之主成分","可當祛痰劑","又稱 eucalyptol"],a:0,n:["錯誤:cineole 為醚類化合物,不是醇類","正確","正確","正確"]},
+{s:"萜類",q:"下列那一個單環萜類,具有抗菌及抗黴菌作用?(100-2)",o:["Geranial","Borneol","Thymol","Artemisinin"],a:2,n:["Geranial 為非環狀萜醛","Borneol 為雙環單萜","Thymol 為單環單萜酚,具抗菌、抗黴菌作用","Artemisinin 為倍半萜"]},
+{s:"萜類",q:"下列何種揮發油的組成為醇類(alcohols)?(100-1)",o:["Cineole","Thymol","Eugenol","Geraniol"],a:3,n:["Cineole 為醚類","Thymol 為酚類","Eugenol 為酚類","Geraniol 為單萜醇類"]},
+{s:"萜類",q:"下列關於 Valerian 之敘述,何者錯誤?(100-1)",o:["藥用部位為 Valeriana officinalis 的根莖部","用於抗焦慮與幫助睡眠","所含成分 valepotriates 為 iridoids 化合物","所含成分 valerenolic acid 為 monoterpenoid 化合物"],a:3,n:["正確","正確","正確","錯誤:valerenolic acid 屬倍半萜類,不是單萜"]},
+{s:"萜類",q:"下列何者不是含 lactone 主要基本架構之倍半萜?(99-1)",o:["Germacranolide","Ginkgolide","Guaianolide","Eudesmanolide"],a:1,n:["屬倍半萜內酯","Ginkgolide 為雙萜內酯,不是倍半萜","屬倍半萜內酯","屬倍半萜內酯"]},
+{s:"萜類",q:"下列關於樟腦(camphor)之敘述,何者錯誤?(99-1)",o:["為醇類化合物","天然產者比旋光度為正","Pinene 為合成 camphor 之原料","低濃度時可當局部止癢劑"],a:0,n:["錯誤:camphor 為酮類,不是醇類","正確(天然為右旋)","正確","正確"]},
+{s:"揮發油",q:"下列揮發油與其主成分之配對,何者錯誤?(113-1)",o:["clove oil-eugenol","nutmeg oil-terpinene","peppermint oil-menthol","cassia oil-cinnamic aldehyde"],a:1,n:["丁香油主成分為 eugenol","錯誤:肉豆蔻油主要成分為 pinene、sabinene、myristicin 等,不是 terpinene","薄荷油主成分為 menthol","肉桂油主成分為 cinnamic aldehyde"]},
+{s:"揮發油",q:"下列何種精油具有抗發炎作用?(112-1)",o:["lavender oil","lemon oil","thyme","wintergreen oil"],a:3,n:["薰衣草油主要為鎮靜","檸檬油主要為香料","百里香油主要為抗菌","Wintergreen oil 含 methyl salicylate,具抗發炎作用"]},
+{s:"揮發油",q:"下列藥用植物與其所屬科別之配對,何者錯誤?(111-2)",o:["Echinacea angustifolia-Asteraceae","Silybum marianum-Labiatae","Foeniculum vulgare-Apiaceae","Hamamelis virginiana-Hamamelidaceae"],a:1,n:["正確","錯誤:水飛薊(Silybum marianum)屬菊科(Asteraceae),不是唇形科","正確","正確"]},
+{s:"揮發油",q:"下列何者為 Betula lenta 樹皮之主成分?(111-2)",o:["methyl salicylate","pinene","thymol","eugenol"],a:0,n:["Betula lenta(甜樺)樹皮主成分為 methyl salicylate","非主成分","非主成分","非主成分"]},
+{s:"揮發油",q:"精油、基原植物與其所屬科別之配對,下列何者正確?(111-2)",o:["Cinnamon oil-Cinnamomum cassia-Lauraceae","Fennel oil-Foeniculum vulgare-Araliaceae","Peppermint oil-Mentha piperita-Piperaceae","Turpentine oil-Pinus palustris-Taxaceae"],a:0,n:["肉桂屬樟科(Lauraceae)","錯誤:茴香屬繖形科(Apiaceae)","錯誤:薄荷屬唇形科","錯誤:松節油來自松科(Pinaceae)"]},
+{s:"揮發油",q:"下列生藥之基原植物,何者不屬於繖形科?(111-1)",o:["Lavandula angustifolia","Carum carvi","Pimpinella anisum","Foeniculum vulgare"],a:0,n:["薰衣草屬唇形科","葛縷子屬繖形科","茴芹屬繖形科","茴香屬繖形科"]},
+{s:"揮發油",q:"下列何者之使用部位與另三者不同?(111-1)",o:["anise","caraway","fennel","thyme"],a:3,n:["使用果實","使用果實","使用果實","百里香(thyme)使用地上部,與另三者不同"]},
+{s:"揮發油",q:"下列何種藥用科別之中藥,其揮發油主要存在於腺毛(glandular hairs)?(110-2)",o:["唇形科,如:荊芥","木蘭科,如:辛夷","芸香科,如:陳皮","繖形科,如:小茴香"],a:0,n:["唇形科的揮發油存在於腺毛","揮發油儲存在油細胞","芸香科存在於溶生/破生導管","繖形科存在於油室(油管)"]},
+{s:"揮發油",q:"脂肪酸之生合成路徑為何?(110-2)",o:["mevalonic acid pathway","acetate-malonate pathway","shikimic acid pathway","amino acid pathway"],a:1,n:["此路徑生成萜類、固醇","Acetate-malonate pathway 生成脂肪酸、蒽醌","此路徑生成芳香族化合物","此路徑生成生物鹼"]},
+{s:"揮發油",q:"下列何者為 nutmeg oil 之製備方法?(110-1)",o:["steam distillation","expression","enfleurage","ecuelle"],a:0,n:["肉豆蔻油以蒸汽蒸餾法製備","壓榨法用於柑橘類","冷吸法用於花油","埃庫爾冷榨法用於柑橘類"]},
+{s:"揮發油",q:"下列何者為製備揮發油之油脂吸附法?(109-2)",o:["direct steam distillation","expression","enfleurage","ecuelle"],a:2,n:["直接蒸氣蒸餾","壓榨法","Enfleurage(冷吸法、油脂吸附法)","埃庫爾冷榨法"]},
+{s:"揮發油",q:"下列何者為 anthraquinone 生合成之前驅物?(109-1)",o:["acetate","mevalonic acid","phenylalanine","tryptophan"],a:0,n:["Anthraquinone 經 acetate-malonate pathway 生成","為萜類前驅物","為苯丙烷類前驅物","為吲哚生物鹼前驅物"]},
+{s:"揮發油",q:"Methyl salicylate 為冬青油(wintergreen oil)主成分,其基原植物及藥用部位為何?(109-1)",o:["Pinus palustris;needle","Eucalyptus globulus;root","Cinnamomum camphora;bark","Gaultheria procumbens;leaf"],a:3,n:["為松節油來源","為桉葉油來源","為樟腦來源","冬青油來自 Gaultheria procumbens 的葉"]},
+{s:"揮發油",q:"有關丁香之敘述,下列何者錯誤?(108-2)",o:["基原植物之科名為 Myricaceae","使用部位為乾燥花蕾","clove 來自拉丁文 clavus 釘子的字意","主成分為 eugenol,可作牙科鎮痛劑"],a:0,n:["錯誤:丁香屬桃金孃科(Myrtaceae),不是 Myricaceae(楊梅科)","正確","正確","正確"]},
+{s:"揮發油",q:"揮發油之芳香類化合物是經由下列何種生合成路徑生成?(108-1)",o:["acetate-mevalonic acid pathway","acetate-malonic acid pathway","shikimic acid-phenylpropanoid pathway","amino acid pathway"],a:2,n:["生成萜類","生成脂肪酸、蒽醌","Shikimic acid-phenylpropanoid pathway 生成芳香類化合物","生成生物鹼"]},
+{s:"揮發油",q:"Spearmint oil 中主要含下列何種成分?(108-1)",o:["d-citronellol","l-citronellol","d-carvone","l-carvone"],a:3,n:["非主成分","非主成分","d-carvone 為葛縷子成分","Spearmint(綠薄荷)油主成分為 l-carvone"]},
+{s:"揮發油",q:"d-Carvone 可由下列何者提取?(107-2)",o:["caraway","fennel","lavender oil","eucalyptus oil"],a:0,n:["葛縷子(caraway)含 d-carvone","茴香主成分為 anethole","薰衣草油主成分為 linalool","桉葉油主成分為 cineole"]},
+{s:"揮發油",q:"下列何者不屬於精油(volatile oils)?(107-2)",o:["eucalyptus oil","pine oil","fennel","sesame oil"],a:3,n:["為精油","為精油","為含精油之生藥","芝麻油為脂肪油(固定油),不是精油"]},
+{s:"揮發油",q:"下列何種植物之揮發油主要存於腺毛(glandular hairs)?(107-2)",o:["Pinus palustris","Pimpinella anisum","Citrus sinensis","Mentha spicata"],a:3,n:["松科存於樹脂道","繖形科存於油室","芸香科存於分泌腔","Mentha spicata(唇形科)存於腺毛"]},
+{s:"揮發油",q:"下列植物科別與其精油(volatile oils)分泌結構之配對,何者錯誤?(107-1)",o:["Labiatae-glandular hairs","Piperaceae-modified parenchymal cells","Rubiaceae-lysigenous or schizogenous passages","Apiaceae-oil tubes"],a:2,n:["正確","正確","錯誤:溶生/破生導管為松科、芸香科的分泌結構,不是 Rubiaceae","正確"]},
+{s:"揮發油",q:"Peppermint oil 主要利用下列何種方法提取?(106-2)",o:["direct steam distillation","expression","enfleurage","ecuelle"],a:0,n:["薄荷油以直接蒸氣蒸餾法提取","壓榨法用於柑橘類","冷吸法用於花油","埃庫爾法用於柑橘類"]},
+{s:"揮發油",q:"下列何種精油通常用 ecuelle method 方法萃取?(103-1)",o:["松油(pine oil)","小茴香油(fennel)","柑橘油(citrus oil)","玫瑰油(rose oil)"],a:2,n:["以蒸餾法製備","以蒸餾法製備","柑橘油用壓榨/埃庫爾法","玫瑰油用冷吸法或蒸餾法"]},
+{s:"樹脂",q:"下列有關 rosin 之敘述,何者錯誤?(113-2)",o:["屬 balsams 類","可作硬化劑(Stiffening agent)","為 Pinus 屬植物之分泌物","主成分為 anhydrides of abietic acid"],a:0,n:["錯誤:rosin(松香)屬樹脂(resin),不屬香膠(balsam)","正確","正確","正確"]},
+{s:"樹脂",q:"Storax 之基原植物科別為:(113-1)",o:["金縷梅科(Hamamelidaceae)","豆科(Fabaceae)","芸香科(Rutaceae)","樟科(Lauraceae)"],a:0,n:["Storax(蘇合香)基原為 Liquidambar orientalis,屬金縷梅科","錯誤","錯誤","錯誤"]},
+{s:"樹脂",q:"下列有關北美聖草(Eriodictyon)之敘述,何者錯誤?(112-2)",o:["藥用部位為葉部","具祛痰作用","基原植物為 Eriodictyon officinale","可為 quinine 的矯味劑"],a:2,n:["正確","正確","錯誤:基原植物為 Eriodictyon californicum","正確(可掩蓋 quinine 苦味)"]},
+{s:"樹脂",q:"下列何種生藥可用於抑制愛滋病治療之噁心嘔吐,而有促進食慾之作用?(112-2)",o:["opium","coca","marihuana","khat"],a:2,n:["鴉片為鎮痛","古柯為局部麻醉及興奮","Marihuana(大麻)的 THC 可止吐並促進食慾","Khat 為興奮劑"]},
+{s:"樹脂",q:"Myrrh 所含 resin acids 的主要化合物?(112-1)",o:["commiphoric acids","ferulic acid","cinnamic acid","abietic acid"],a:0,n:["沒藥特有成分為 commiphoric acids","非主要成分","非主要成分","Abietic acid 為松香成分"]},
+{s:"樹脂",q:"下列何種香膠(balsam)具收斂作用,可止痔瘡(hemorrhoids)?(111-2)",o:["storax","Peruvian balsam","Tolu balsam","benzoin"],a:1,n:["蘇合香用於殺寄生蟲","Peruvian balsam(秘魯香膠)具收斂作用,可治痔瘡","吐魯香膠用於祛痰","安息香用於防腐、祛痰"]},
+{s:"樹脂",q:"秘魯香膠(Peru balsam)基原植物 Myroxylon pereirae 之科別為何?(111-2)",o:["薔薇科","豆科","繖形科","橄欖科"],a:1,n:["錯誤","Myroxylon pereirae 屬豆科","錯誤","錯誤"]},
+{s:"樹脂",q:"下列何種生藥可作為牙齒塗料(dental varnish)?(111-1)",o:["eriodictyon","colophony","mastic","myrrh"],a:2,n:["為矯味劑、祛痰劑","為硬化劑","Mastic(乳香)可作牙齒塗料、補齲齒填充劑","沒藥為防腐劑、收斂劑"]},
+{s:"樹脂",q:"Δ9-Tetrahydrocannabinol 主要分布在 Cannabis sativa 之何種部位?(111-1)",o:["莖部","皮部","根部","雌花"],a:3,n:["錯誤","錯誤","錯誤","THC 主要分布於雌花"]},
+{s:"樹脂",q:"生藥與其所含樹脂類型之配對,下列何者錯誤?(110-2)",o:["rosin-resin","turpentine-oleoresin","storax-oleo-gum-resin","benzoin-balsam"],a:2,n:["正確","正確","錯誤:storax(蘇合香)屬香膠(balsam),不是油膠樹脂","正確"]},
+{s:"樹脂",q:"Δ9-THC 之化學結構具有下列何種官能基?(110-2)",o:["酯基","醚基","醛基","羧基"],a:1,n:["錯誤","THC 結構含醚基(含氧雜環)與酚羥基","錯誤","錯誤"]},
+{s:"樹脂",q:"下列何種生藥與乳香(mastic)屬同一科植物?(110-1)",o:["西黃耆膠","甘草","五倍子","沒食子"],a:2,n:["錯誤:西黃耆膠為豆科","錯誤:甘草為豆科","依書中解答為五倍子(依一般分類,乳香與五倍子之基原皆屬漆樹科)","錯誤"]},
+{s:"樹脂",q:"沒藥(myrrh)之基原植物科別為何?(110-1)",o:["芸香科(Rutaceae)","木犀科(Oleaceae)","橄欖科(Burseraceae)","薑科(Zingiberaceae)"],a:2,n:["錯誤","錯誤","沒藥(Commiphora molmol)屬橄欖科(Burseraceae)","錯誤"]},
+{s:"樹脂",q:"下列香膠(balsam)類生藥,何者可應用於殺寄生蟲及作為痔瘡治療劑?(110-1)",o:["Tolu balsam","Peruvian balsam","benzoin","storax"],a:1,n:["吐魯香膠用於祛痰","秘魯香膠用於殺寄生蟲及痔瘡","安息香用於防腐、祛痰","非本題答案(依書中解答為 Peruvian balsam)"]},
+{s:"樹脂",q:"Kava-kava 之生藥基原植物科別為何?(109-2)",o:["繖形科(Apiaceae)","松科(Pineaceae)","胡椒科(Piperaceae)","棕櫚科(Arecaceae)"],a:2,n:["錯誤","錯誤","Kava(Piper methysticum)屬胡椒科","錯誤"]},
+{s:"樹脂",q:"含Δ9-tetrahydrocannabinol 之生藥及該成分之化學結構分類為何?(109-2)",o:["myrrh;phenylpropanoid","marihuana;terpenoid","colophony;indole alkaloid","yerba santa;phenol glycoside"],a:1,n:["沒藥不含 THC","Marihuana(大麻)含 THC,屬萜類酚(terpenoid)","松香不含 THC","聖草不含 THC"]},
+{s:"樹脂",q:"薑之主要揮發油成分分屬於下列那一類化合物?(109-2)",o:["單萜類","倍半萜類","雙萜類","三萜類"],a:1,n:["錯誤","薑揮發油主成分 zingiberene 為倍半萜","錯誤","錯誤"]},
+{s:"樹脂",q:"Benzoin 不具有下列何種作用?(109-1)",o:["antiseptic","diuretic","expectorant","anticancer"],a:3,n:["具防腐作用","具利尿作用","具祛痰作用","安息香不具抗癌作用"]},
+{s:"樹脂",q:"Rosin 主要成分為:(108-2)",o:["sabinene","d-pinene","abietic anhydride","mastichic acid"],a:2,n:["非主成分","非主成分(為松節油成分)","Rosin 含 80~90% abietic acid 之酸酐","為乳香成分"]},
+{s:"樹脂",q:"關於薑之敘述,下列何者錯誤?(108-2)",o:["取用薑科 Curcuma longa 之根莖","zingiberene 為其典型氣成分之一","zingerone 為其辛辣成分之一","為芳香刺激劑(aromatic stimulant)與驅風劑"],a:0,n:["錯誤:薑的基原為 Zingiber officinale,Curcuma longa 為薑黃","正確","正確","正確"]},
+{s:"樹脂",q:"下列關於沒藥之敘述,何者錯誤?(108-2)",o:["基原植物為 Commiphora molmol","為橄欖科植物","特有成分為 commiphoric acids","為中國之特產"],a:3,n:["正確","正確","正確","錯誤:沒藥主要產於非洲、阿拉伯地區,不是中國特產"]},
+{s:"樹脂",q:"下列有關乳香(mastic)的敘述,何者正確?(108-1)",o:["是從 Pistacia lentiscus L.的花穗萃取,乾燥而得","其主成分 90%為精油","其主成分之 masticin 可溶於酒精","可作為補齲齒之填充劑"],a:3,n:["錯誤:乳香取自樹幹滲出的樹脂","錯誤","錯誤:masticin 不溶於酒精","乳香可作為補齲齒之填充劑"]},
+{s:"樹脂",q:"何種生藥之使用部位為根與根莖,其所含樹脂(resin)含有 styrylpyrones?(107-2)",o:["cannabis","eriodictyon","kava","mayapple"],a:2,n:["使用雌花","使用葉","Kava 根與根莖含 styrylpyrones","Mayapple 含 podophyllotoxin"]},
+{s:"樹脂",q:"下列生藥與基原之配對,何者正確?(107-1)",o:["kava-Piper methysticum","rosin-Pistacia lentiscus","cannabis-Eriodictyon californicum","turpentine-Zingiber officinale"],a:0,n:["Kava 基原為 Piper methysticum","錯誤:松香來自松屬,Pistacia lentiscus 為乳香","錯誤:大麻為 Cannabis sativa","錯誤:松節油來自松屬"]},
+{s:"樹脂",q:"下列何者為樹脂油(oleoresins)?(107-1)",o:["turpentine","myrrh","storax","benzoin"],a:0,n:["松節油為樹脂油(oleoresin)","沒藥為油膠樹脂","蘇合香為香膠","安息香為香膠"]},
+{s:"樹脂",q:"下列何者不屬於樹脂及樹脂組合物(resins and resin combinations)?(105-2)",o:["kava","cannabis","mastic","fennel"],a:3,n:["屬樹脂類","屬樹脂類","屬樹脂類","Fennel 為含精油生藥,不是樹脂類"]},
+{s:"樹脂",q:"大麻(Cannabis)之迷幻作用成分為:(101-1)",o:["Tetrahydrocannabinol","Cannabinol","Cannabidiolic acid","Cannabichromene"],a:0,n:["THC 為迷幻作用主成分","非主要迷幻成分","非主要迷幻成分","非主要迷幻成分"]},
+{s:"樹脂",q:"下列有關樹脂特性之敘述,何者錯誤?(100-1)",o:["化學性質複雜","可能為 terpenes 的氧化產物","可溶於水","為無定形固體"],a:2,n:["正確","正確","錯誤:樹脂不易溶於水","正確"]},
+{s:"樹脂",q:"下列有關Δ9-Tetrahydrocannabinol 藥理作用的敘述,何者正確?(99-2) ①可用於抑制化學療法引起之嘔吐 ②可抑制化學療法引起之落髮 ③具止痛作用,但易引起失眠 ④可刺激 AIDS 病人之食慾",o:["僅①②","僅①④","僅②③④","①②③④"],a:1,n:["②不正確","①可止吐、④可促進食慾,僅①④正確","②③不正確","②③不正確"]},
+{s:"脂質",q:"有關蓖麻油(castor oil)之敘述,下列何者錯誤?(113-2)",o:["來自 Ricinus communis 之種子","具有瀉下的作用","所含之 triacylglycerols 多為 triricinoleoylglycerol","所含的 ricin 不具血球凝集作用"],a:3,n:["正確","正確(含 ricinoleic acid 具瀉下作用)","正確","錯誤:ricin 為毒性蛋白,具血球凝集作用"]},
+{s:"脂質",q:"關於 theobroma oil 之敘述,下列何者錯誤?(113-1)",o:["基原植物之科名為 Sterculiaceae","於 20~25℃熔化","可作為栓劑基質","theobroma 源自希臘文,意為「神的食物」"],a:1,n:["正確","錯誤:可可脂約在 30~35℃熔化,接近體溫,故適合作栓劑基質","正確","正確"]},
+{s:"脂質",q:"下列脂肪酸中,何者存在於海魚且具有抗血小板凝集作用?(112-2)",o:["16:1(ω7)","20:1(ω9)","20:1(ω11)","20:5(ω3)"],a:3,n:["非海魚抗血小板成分","非海魚抗血小板成分","非海魚抗血小板成分","20:5(ω3)即 EPA,存在於海魚,具抗血小板凝集作用"]},
+{s:"脂質",q:"下列何者為黃蠟(yellow wax)精製成白蠟(white wax)所使用的方法之一?(112-2)",o:["氫化","加熱","陽光漂曬","水解"],a:2,n:["非漂白方法","非漂白方法","黃蠟可經陽光漂曬成白蠟","非漂白方法"]},
+{s:"脂質",q:"下列橄欖油(olive oil)製品中何者具有最高酸價(acid value)?(111-2)",o:["technical oil","tournant oil","virgin olive oil","sulfur olive oil"],a:1,n:["非酸價最高者","Tournant oil 酸價最高(依書中解答)","特級初榨酸價低","非酸價最高者"]},
+{s:"脂質",q:"下列植物油何者取自果實之中果皮(mesocarp)?(111-1)",o:["coconut oil","castor oil","palm oil","cottonseed oil"],a:2,n:["取自椰子胚乳","取自種子","Palm oil(棕櫚油)取自中果皮","取自種子"]},
+{s:"脂質",q:"下列何種蠟(waxes)來自植物?(111-1)",o:["carnauba wax","lac wax","white wax","yellow wax"],a:0,n:["Carnauba wax(巴西棕櫚蠟)來自植物葉","蟲膠蠟來自昆蟲","白蠟來自蜂蠟或蟲白蠟","黃蠟來自蜜蜂"]},
+{s:"脂質",q:"下列植物油與其基原之配對,何者錯誤?(110-2)",o:["sesame oil-Sesamum indicum(Pedaliaceae)","safflower oil-Helianthus annuus(Asteraceae)","cottonseed oil-Gossypium hirsutum(Malvaceae)","almond oil-Prunus amygdalus(Rosaceae)"],a:1,n:["正確","錯誤:紅花油基原為 Carthamus tinctorius,Helianthus annuus 為向日葵","正確","正確"]},
+{s:"脂質",q:"下列何者為不飽和脂肪酸?(110-1)",o:["erucic acid","lauric acid","myristic acid","palmitic acid"],a:0,n:["Erucic acid(芥酸)為不飽和脂肪酸","為飽和脂肪酸","為飽和脂肪酸","為飽和脂肪酸"]},
+{s:"脂質",q:"為什麼酯價在分析黃蠟和白蠟之品質特別具有價值?(109-1)",o:["可用來估算琥珀酸含量","可用來判斷是否摻有添加物(如 paraffin)","可估算熔點","可判斷是否酸敗"],a:1,n:["錯誤","酯價可用於判斷蠟中是否摻有 paraffin 等添加物","錯誤","酸價才與酸敗有關"]},
+{s:"脂質",q:"下列有關脂質之敘述,何者錯誤?(109-1)",o:["linoleic acid 可生合成 arachidonic acid","人體無法製造 linoleic acid","linolenic acid 含二個烯鍵","oleic acid 含一個烯鍵"],a:2,n:["正確","正確(必需脂肪酸)","錯誤:linolenic acid 含三個烯鍵(18:3)","正確"]},
+{s:"脂質",q:"下列何者為碘價的測試目的?(108-2)",o:["測定羧基含量","測定羥基含量","測定碘含量","測定不飽和度"],a:3,n:["為酸價","為乙醯價","非碘價目的","碘價用於測定油脂的不飽和度"]},
+{s:"脂質",q:"下列有關脂質價之敘述,何者錯誤?(108-2)",o:["碘價是指檢品 1g,所能吸收碘之 mg 數","皂化價是指皂化及中和檢品 1g 之酯及游離脂肪酸,所需氫氧化鉀之 mg 數","酯價是指皂化檢品 1g 中所含之酯,所需氫氧化鉀之 mg 數","酸價是指中和檢品 1g 之游離脂肪酸,所需氫氧化鉀之 mg 數"],a:0,n:["錯誤:依書中解答此為錯誤敘述(碘價一般定義為每 100 g 檢品所吸收碘的克數)","正確","正確","正確"]},
+{s:"脂質",q:"關於 lanolin 之敘述,下列何者正確?(108-2)",o:["含 35~40%水份,常稱為 hydrous wool fat","anhydrous lanolin 含水量不得超過 2.5%","可作軟膏基質","對於高敏感使用者,可能會引起過敏"],a:3,n:["非本題答案(依書中解答 D 正確)","非本題答案(依書中解答 D 正確)","非本題答案(依書中解答 D 正確)","正確:羊毛脂可能引起過敏"]},
+{s:"脂質",q:"下列何者是半乾性油的碘價範圍?(108-1)",o:["100~120","80~100","120~140","140~160"],a:0,n:["半乾性油碘價約 100~120","非半乾性油範圍","為乾性油範圍","為乾性油範圍"]},
+{s:"脂質",q:"下列何種脂肪酸具 18:3(n-3 or n-6; ω3 or ω6)化學標記?(108-1)",o:["linoleic acid","linolenic acid","ricinoleic acid","arachidonic acid"],a:1,n:["Linoleic acid 為 18:2","Linolenic acid 為 18:3","Ricinoleic acid 為羥基脂肪酸","Arachidonic acid 為 20:4"]},
+{s:"脂質",q:"下列何者係由 myricyl alcohol 與另一長鏈脂肪酸所形成之脂質?(108-1)",o:["spermaceti","jojoba oil","beeswax","lanolin"],a:2,n:["鯨蠟主成分為 cetyl palmitate","荷荷芭油為液態蠟","蜂蠟含 myricyl palmitate","羊毛脂含固醇酯"]},
+{s:"脂質",q:"Sesamolin 為除蟲菊殺蟲劑(pyrethrum insecticides)的增強劑,含於下列何者?(107-2)",o:["safflower oil","linseed oil","teel oil","castor oil"],a:2,n:["不含 sesamolin","不含 sesamolin","Teel oil 即芝麻油,含 sesamolin","不含 sesamolin"]},
+{s:"脂質",q:"下列何者是動物脂肪的碘價範圍?(107-1)",o:["150~180","< 90","120~150","90~120"],a:1,n:["為乾性油範圍","動物脂肪碘價較低,< 90","為半乾性油範圍","為半乾性油範圍"]},
+{s:"脂質",q:"下列有關 castor oil 敘述,何者正確?(107-1)",o:["抽提自 Ricinus communis L.之根部","基原植物之科名為 Eucommiaceae","成分為 triacylglycerols 混合物","在胃被酵素水解造 ricinoleic acid,而具峻瀉作用"],a:2,n:["錯誤:取自種子","錯誤:蓖麻屬大戟科(Euphorbiaceae)","正確","錯誤:在小腸受脂肪酶水解,不是在胃(依書中解答)"]},
+{s:"脂質",q:"下列何種植物的種子所含的木質素類(lignan)成分是一種除蟲菊殺蟲劑之增效劑(synergistic effect)?(107-1)",o:["Glycine soja","Olea europaea","Sesamum indicum","Zea mays"],a:2,n:["為大豆","為橄欖","Sesamum indicum(芝麻)含 sesamin、sesamolin","為玉米"]},
+{s:"脂質",q:"下列何者在化學分類上屬於 liquid wax?(106-1)",o:["coconut oil","olive oil","jojoba oil","linseed oil"],a:2,n:["為脂肪油","為脂肪油","荷荷芭油為液態蠟","為脂肪油"]},
+{s:"脂質",q:"下列何者歸類為單不飽和油(monounsaturated oil)?(106-1)",o:["coconut oil","palm kernel oil","rapeseed oil","safflower oil"],a:2,n:["飽和脂肪酸為主","飽和脂肪酸為主","Rapeseed oil(油菜籽油)以單不飽和脂肪酸為主","多不飽和脂肪酸為主"]},
+{s:"脂質",q:"下列何種植物油之 linoleic acid 含量最多?(104-1)",o:["Safflower oil","Cottonseed oil","Peanut oil","Palm kernel oil"],a:0,n:["紅花油 linoleic acid 含量最高","含量較低","含量較低","飽和脂肪酸為主"]},
+{s:"補充資料",q:"Phloridzin 之結構如下,其苷元屬於下列何種架構?(112-1)",o:["dihydrochalcone","anthraquinone","stilbene","lignan"],a:0,n:["Phloridzin 的苷元為 dihydrochalcone(結構圖見講義補充資料)","不是蒽醌","不是二苯乙烯","不是木酚素"]},
+{s:"補充資料",q:"Glycosyl transferase 可將下列何者之醣基轉換至苷元?(112-1)",o:["sugar-1-phosphate","UTP-sugar","UDP-sugar","sugar-6-phosphate"],a:1,n:["非醣基供體","講義標示答案為 B;但講義內文寫「可將 UDP-sugar 之醣基轉換至苷元」,兩者看起來有出入,請再確認","UDP-sugar 為一般公認的醣基供體(講義內文亦寫此項)","非醣基供體"]},
+{s:"補充資料",q:"在基因治療的過程中,將細胞從病人身上取出,使其與基因物一同培養生長後再殖入人體的治療方式稱為:(108-1)",o:["in-vivo","ex-vivo","in-vitro","ex-vitro"],a:1,n:["In vivo 為將基因直接導入體內","Ex vivo 為先在體外培養一段時間後,再導入體內","非基因治療用詞","非基因治療用詞"]},
+{s:"補充資料",q:"來自 Proteus vulgaris 之限制酶命名,何者正確?(108-1)",o:["PrvI","PvuI","ProvI","PvI"],a:1,n:["不符合命名規則","屬名第 1 字+種名前 2 字+羅馬數字:Pvul(依講義寫法)","不符合命名規則","不符合命名規則"]},
+{s:"補充資料",q:"Prostaglandins 係幾個碳之脂質代謝物?(107-2)",o:["18","19","20","21"],a:2,n:["18 碳為雌性素","19 碳為雄性素","前列腺素為 20 碳","21 碳為黃體素"]},
+{s:"消業障",q:"下列強心苷(Cardiac glycoside)何者在臨床上具有較高之安全性?(113-1)",o:["digitoxin","convallatoxin","digoxin","cymarin"],a:2,n:["Digitoxin 為脂溶性,半衰期長,蓄積性高","為鈴蘭成分,臨床少用","Digoxin 經腎臟排泄、較易控制,臨床上較安全","Cymarin 臨床少用"]},
+{s:"消業障",q:"下列活血化瘀中藥,何者活性成分之一如圖示?(112-1)",o:["紅花","丹參","牛膝","桃仁"],a:1,n:["紅花含紅花黃色素等","圖示為丹參酮(tanshinone)類結構,為丹參活性成分","牛膝含蛻皮甾酮等","桃仁含苦杏仁苷"]},
+{s:"消業障",q:"有關「De materia medica libri cinque」一書之資料,下列何者錯誤?(110-2)",o:["作者為 P. Dioscorides","共有五卷","含有 600 個植物性藥物","於 1815 年出版"],a:3,n:["正確","正確","正確","錯誤(依書中解答)"]},
+{s:"消業障",q:"有關天然藥物記載之敘述,下列何者錯誤?(109-2)",o:["本草綱目收載約 2,000 個藥材","Vedas 是印度之藥典,收載藥材 1,000 個以上","rauwolfia 源自於 Ayurvedic medicine","Ayurvedic medicine 屬於古埃及之醫藥"],a:3,n:["正確","正確","正確","錯誤:Ayurvedic medicine 為古印度傳統醫學,不是古埃及醫藥"]},
+{s:"消業障",q:"下列何者不是中藥半夏的歸經?(109-2)",o:["脾","肝","胃","肺"],a:1,n:["半夏歸脾經","半夏不歸肝經(依書中解答)","半夏歸胃經","半夏歸肺經"]},
+{s:"消業障",q:"有關 ELISA(enzyme-linked immunosorbent assay)之敘述,下列何者正確?(108-2)",o:["其原理是利用抗原引發免疫反應,產生抗體外抗原的疫苗","可用於治療病毒性感染","可用於診斷內生性的小分子,對外因性的病毒感染則無法檢測","利用二級抗體結合催化酶可達增幅偵測效果"],a:3,n:["錯誤:ELISA 是檢測方法,不是疫苗","錯誤:ELISA 是檢測方法,不是治療","錯誤:可檢測病毒等外來抗原","二級抗體結合催化酶可放大偵測訊號"]},
+{s:"消業障",q:"關於利用 site-directed mutagenesis 技術改變蛋白質藥物特性、增加蛋白質穩定性之敘述,何者錯誤?(107-2)",o:["位在 GM-CSF 之蛋白酶水解切點(protease cleavage),以 leucine 取代 arginine","human β-interferon 上非配對的 cysteine 由 serine 取代,減少分子間的雙硫鍵結","tissue plasminogen activator 的 asparagine 由 glutamine 取代,可減少蛋白質醣化","利用由本技術產生的蛋白質無致敏性"],a:3,n:["正確","正確","正確","錯誤:該技術產生的蛋白質仍可能有致敏性"]}
+];
+Q.forEach(x=>{if(x.s=="配醣體總論"||x.s=="強心配醣體")x.s="配醣體"});
+const $=document.getElementById('app'),L='ABCD';
+let W=[];try{W=JSON.parse(localStorage.getItem('aphar_wrong')||'[]')}catch(e){}
+const save=()=>{try{localStorage.setItem('aphar_wrong',JSON.stringify(W))}catch(e){}};
+const secs=[...new Set(Q.map(x=>x.s))];
+let S;
+const N=15;
+let SEEN=[];try{SEEN=JSON.parse(localStorage.getItem('aphar_seen')||'[]')}catch(e){}
+const saveSeen=()=>{try{localStorage.setItem('aphar_seen',JSON.stringify(SEEN))}catch(e){}};
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const unseenOf=ids=>ids.filter(i=>!SEEN.includes(i));
+function draw(pool,t){
+  if(t=='錯題')return shuf(pool).slice(0,N);
+  const u=shuf(unseenOf(pool)),s=shuf(pool.filter(i=>SEEN.includes(i)));
+  return u.concat(s).slice(0,N);
+}
+function home(){
+  W=W.filter(i=>Q[i]);SEEN=SEEN.filter(i=>Q[i]);
+  const all=Q.map((_,i)=>i),un=unseenOf(all).length;
+  $.innerHTML=`<h1>A'phar 生藥學練習題</h1><p class="sub">共 ${Q.length} 題 · 每次抽 ${N} 題,優先抽沒做過的 · 作答後顯示每個選項的詳解</p>
+  <div class="bar" title="已做過"><i style="width:${(Q.length-un)/Q.length*100}%"></i></div>
+  <p class="sub">已做過 ${Q.length-un} / ${Q.length} 題 · 還沒做過 ${un} 題</p>
+  <h2>混合練習</h2>
+  <button class="row pri" onclick="start(Q.map((_,i)=>i),'混合')"><span>所有章節混合(抽 ${N} 題)</span><small>未做 ${un}</small></button>
+  <h2>錯題測驗區</h2>
+  <button class="row" ${W.length?'':'disabled style="opacity:.5"'} onclick="start(W.slice(),'錯題')"><span>重做錯題(最多 ${N} 題)</span><small>${W.length} 題</small></button>
+  ${W.length?'<button class="row" onclick="W=[];save();home()"><span>清空錯題本</span></button>':''}
+  <h2>依章節練習</h2>`+secs.map(s=>{const ids=Q.map((x,i)=>x.s==s?i:-1).filter(i=>i>=0);return `<button class="row" onclick='start(${JSON.stringify(ids)},"${s}")'><span>${s}</span><small>未做 ${unseenOf(ids).length} / ${ids.length}</small></button>`}).join('')
+  +`<h2>做題紀錄</h2><button class="row" onclick="if(confirm('確定要清除「已做過」紀錄?錯題本不會被清除。')){SEEN=[];saveSeen();home()}"><span>重設已做過紀錄</span></button>`;
+}
+function start(pool,t){
+  S={pool:pool.slice(),ids:draw(pool,t),t,i:0,ok:0,done:0,p:null};show();
+}
+function show(){
+  if(S.i>=S.ids.length)return end();
+  const id=S.ids[S.i],x=Q[id],p=S.p;
+  $.innerHTML=`<div class="top"><span>${S.t} · ${S.i+1}/${S.ids.length}</span><button onclick="home()" style="background:none;border:0;color:var(--ac)">離開</button></div>
+  <div class="bar"><i style="width:${S.i/S.ids.length*100}%"></i></div>
+  <div class="tag">${x.s}</div><div class="q">${x.q}</div>`+x.o.map((o,k)=>{
+    let c='';if(p!==null){if(k==x.a)c='ok';else if(k==p)c='no'}
+    return `<button class="opt ${c}" ${p!==null?'disabled':''} onclick="pick(${k})">${L[k]}. ${o}${p!==null?`<span class="note">${k==x.a?'✓ 正確':'✗ 錯誤'}:${x.n[k]}</span>`:''}</button>`}).join('')
+  +(p!==null?`<div class="nav"><button class="pri" onclick="S.i++;S.p=null;show()">${S.i+1<S.ids.length?'下一題':'看結果'}</button></div>`:'');
+  window.scrollTo(0,0);
+}
+function pick(k){
+  const id=S.ids[S.i],x=Q[id];S.p=k;S.done++;
+  if(!SEEN.includes(id)){SEEN.push(id);saveSeen()}
+  if(k==x.a){S.ok++;if(S.t=='錯題')W=W.filter(i=>i!=id)}else if(!W.includes(id))W.push(id);
+  save();show();
+}
+function again(){const p=S.t=='錯題'?W.slice():S.pool;start(p,S.t)}
+function end(){
+  const left=S.t=='錯題'?W.length:unseenOf(S.pool).length;
+  $.innerHTML=`<div class="big">${S.ok}/${S.ids.length}</div><p class="ctr">答對率 ${Math.round(S.ok/S.ids.length*100)}% · 錯題本共 ${W.length} 題<br>${S.t=='錯題'?'錯題本還剩':'這個範圍還沒做過'} ${left} 題</p>
+  <div class="nav"><button onclick="home()">回首頁</button>${(S.t=='錯題'&&!W.length)?'':`<button class="pri" onclick="again()">再抽 ${N} 題</button>`}</div>
+  ${(S.t!='錯題'&&W.length)?`<div class="nav"><button onclick="start(W.slice(),'錯題')">重做錯題</button></div>`:''}`;
+}
+home();
+</script></body></html>
